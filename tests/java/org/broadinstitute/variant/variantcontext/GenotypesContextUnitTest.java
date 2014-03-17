@@ -50,13 +50,13 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         C = Allele.apply("C");
         Aref = Allele.apply("A", true);
         T = Allele.apply("T");
-        AA = GenotypeBuilder.create("AA", Arrays.asList(Aref, Aref));
-        AT = GenotypeBuilder.create("AT", Arrays.asList(Aref, T));
-        TT = GenotypeBuilder.create("TT", Arrays.asList(T, T));
-        AC = GenotypeBuilder.create("AC", Arrays.asList(Aref, C));
-        CT = GenotypeBuilder.create("CT", Arrays.asList(C, T));
-        CC = GenotypeBuilder.create("CC", Arrays.asList(C, C));
-        MISSING = GenotypeBuilder.create("MISSING", Arrays.asList(C, C));
+        AA = GenotypeBuilder.apply("AA", new Allele[]{Aref, Aref});
+        AT = GenotypeBuilder.apply("AT", new Allele[]{Aref, T});
+        TT = GenotypeBuilder.apply("TT", new Allele[]{T, T});
+        AC = GenotypeBuilder.apply("AC", new Allele[]{Aref, C});
+        CT = GenotypeBuilder.apply("CT", new Allele[]{C, T});
+        CC = GenotypeBuilder.apply("CC", new Allele[]{C, C});
+        MISSING = GenotypeBuilder.apply("MISSING", new Allele[]{C, C});
 
         allGenotypes = Arrays.asList(AA, AT, TT, AC, CT, CC);
     }
@@ -225,8 +225,8 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
 
     @Test(enabled = true, dataProvider = "GenotypesContextProvider")
     public void testAdds(GenotypesContextProvider cfg) {
-        Genotype add1 = GenotypeBuilder.create("add1", Arrays.asList(Aref, Aref));
-        Genotype add2 = GenotypeBuilder.create("add2", Arrays.asList(Aref, Aref));
+        Genotype add1 = GenotypeBuilder.apply("add1", new Allele[]{Aref, Aref});
+        Genotype add2 = GenotypeBuilder.apply("add2", new Allele[]{Aref, Aref});
 
         GenotypesContext gc = cfg.makeContext();
         gc.add(add1);
@@ -281,7 +281,7 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
 
     @Test(enabled = true, dataProvider = "GenotypesContextProvider")
     public void testSet(GenotypesContextProvider cfg) {
-        Genotype set = GenotypeBuilder.create("replace", Arrays.asList(Aref, Aref));
+        Genotype set = GenotypeBuilder.apply("replace", new Allele[]{Aref, Aref});
         int n = cfg.makeContext().size();
         for ( int i = 0; i < n; i++ ) {
             GenotypesContext gc = cfg.makeContext();
@@ -299,7 +299,7 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         for ( int i = 0; i < n; i++ ) {
             GenotypesContext gc = cfg.makeContext();
             Genotype toReplace = gc.get(i);
-            Genotype replacement = GenotypeBuilder.create(toReplace.getSampleName(), Arrays.asList(Aref, Aref));
+            Genotype replacement = GenotypeBuilder.apply(toReplace.getSampleName(), new Allele[]{Aref, Aref});
             gc.replace(replacement);
             ArrayList<Genotype> l = new ArrayList<Genotype>(cfg.initialSamples);
             l.set(i, replacement);

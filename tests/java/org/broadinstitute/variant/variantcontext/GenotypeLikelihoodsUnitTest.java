@@ -157,7 +157,7 @@ public class GenotypeLikelihoodsUnitTest extends VariantBaseTest {
         Allele alt1 = Allele.apply((byte)'C');
         Allele alt2 = Allele.apply((byte)'T');
         List<Allele> allAlleles = Arrays.asList(ref,alt1,alt2);
-        List<Allele> gtAlleles = Arrays.asList(alt1,alt2);
+        Allele[] gtAlleles = new Allele[]{alt1,alt2};
         GenotypeBuilder gtBuilder = new GenotypeBuilder();
         gtBuilder.alleles(gtAlleles);
         double actualGQ = gl.getLog10GQ(gtBuilder.make(),allAlleles);

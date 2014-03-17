@@ -150,7 +150,12 @@ public class BCF2GenotypeFieldDecoders {
                     // no called sample GT = .
                     gb.alleles(null);
                 } else if ( a2 == type.getMissingBytes() ) {
-                    gb.alleles(Arrays.asList(getAlleleFromEncoded(siteAlleles, a1)));
+
+                    List<Allele> gt = Arrays.asList(getAlleleFromEncoded(siteAlleles, a1));
+                    Allele[] aArr = new Allele[gt.size()];
+                    aArr = gt.toArray(aArr);
+
+                    gb.alleles(aArr);
                 } else {
                     // downshift to remove phase
                     final int offset = (a1 >> 1) * 3 + (a2 >> 1);
@@ -165,7 +170,10 @@ public class BCF2GenotypeFieldDecoders {
                         allGenotypes[offset] = gt;
                     }
 
-                    gb.alleles(gt);
+                    Allele[] aArr = new Allele[gt.size()];
+                    aArr = gt.toArray(aArr);
+
+                    gb.alleles(aArr);
                 }
 
                 final boolean phased = (a1 & 0x01) == 1;
@@ -199,7 +207,11 @@ public class BCF2GenotypeFieldDecoders {
                     for ( final int encode : encoded )
                         gt.add(getAlleleFromEncoded(siteAlleles, encode));
 
-                    gb.alleles(gt);
+
+                    Allele[] aArr = new Allele[gt.size()];
+                    aArr = gt.toArray(aArr);
+
+                    gb.alleles(aArr);
                     final boolean phased = (encoded[0] & 0x01) == 1;
                     gb.phased(phased);
                 }

@@ -59,9 +59,12 @@ public class GenotypeUnitTest extends VariantBaseTest {
         Assert.assertNull(makeGB().filter("PASS").make().getFilters(), "Genotypes PASS => getFilters == null");
         Assert.assertTrue(makeGB().filter("x").make().isFiltered(), "setting filter != null => Genotypes must be PASS");
         Assert.assertEquals(makeGB().filter("x").make().getFilters(), "x", "Should get back the expected filter string");
-        Assert.assertEquals(makeGB().filters("x", "y").make().getFilters(), "x;y", "Multiple filter field values should be joined with ;");
-        Assert.assertEquals(makeGB().filters("x", "y", "z").make().getFilters(), "x;y;z", "Multiple filter field values should be joined with ;");
-        Assert.assertTrue(makeGB().filters("x", "y", "z").make().isFiltered(), "Multiple filter values should be filtered");
+        String[] filters = {"x", "y"};
+        Assert.assertEquals(makeGB().filters(filters).make().getFilters(), "x;y", "Multiple filter field values should be joined with ;");
+        String[] filters2 = {"x", "y", "z"};
+        Assert.assertEquals(makeGB().filters(filters2).make().getFilters(), "x;y;z", "Multiple filter field values should be joined with ;");
+        String[] filters3 = {"x", "y", "z"};
+        Assert.assertTrue(makeGB().filters(filters3).make().isFiltered(), "Multiple filter values should be filtered");
         Assert.assertEquals(makeGB().filter("x;y;z").make().getFilters(), "x;y;z", "Multiple filter field values should be joined with ;");
     }
 

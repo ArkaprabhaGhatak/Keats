@@ -1,6 +1,6 @@
 /*
 * Copyright (c) 2012 The Broad Institute
-* 
+*
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
 * files (the "Software"), to deal in the Software without
@@ -9,10 +9,10 @@
 * copies of the Software, and to permit persons to whom the
 * Software is furnished to do so, subject to the following
 * conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be
 * included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -23,12 +23,12 @@
 * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-package org.broadinstitute.variant.variantcontext;
-
+package org.broadinstitute.variant.variantcontext
 
 import com.google.java.contract.Requires;
 
-import java.util.*;
+
+import scala.collection._
 
 /**
  * This class encompasses all the basic information about a genotype.  It is immutable.
@@ -74,109 +74,73 @@ import java.util.*;
  * @author Mark DePristo
  * @since 05/12
  */
-public final class FastGenotype extends Genotype {
-    private final List<Allele> alleles;
-    private final boolean isPhased;
-    private final int GQ;
-    private final int DP;
-    private final int[] AD;
-    private final int[] PL;
-    private final Map<String, Object> extendedAttributes;
 
-    /**
-     * The only way to make one of these, for use by GenotypeBuilder only
-     *
-     * @param sampleName
-     * @param alleles
-     * @param isPhased
-     * @param GQ
-     * @param DP
-     * @param AD
-     * @param PL
-     * @param extendedAttributes
-     */
-    @Requires({
-            "sampleName != null",
-            "alleles != null",
-            "GQ >= -1",
-            "DP >= -1",
-            "validADorPLField(AD)",
-            "validADorPLField(PL)",
-            "extendedAttributes != null",
-            "! hasForbiddenKey(extendedAttributes)"})
-    protected FastGenotype(final String sampleName,
-                           final List<Allele> alleles,
-                           final boolean isPhased,
-                           final int GQ,
-                           final int DP,
-                           final int[] AD,
-                           final int[] PL,
-                           final String filters,
-                           final Map<String, Object> extendedAttributes) {
-        super(sampleName, filters);
-        this.alleles = alleles;
-        this.isPhased = isPhased;
-        this.GQ = GQ;
-        this.DP = DP;
-        this.AD = AD;
-        this.PL = PL;
-        this.extendedAttributes = extendedAttributes;
-    }
+/**
+ * Created by Wim Spee on 2/23/14.
+ */
+/**
+ * The only way to make one of these, for use by GenotypeBuilder only
+ *
+ * @param sampleName
+ * @param alleles
+ * @param _isPhased
+ * @param GQ
+ * @param DP
+ * @param AD
+ * @param PL
+ * @param extendedAttributes
+ */
+@Requires(Array[String](
+  "sampleName != null",
+  "alleles != null",
+  "GQ >= -1",
+  "DP >= -1",
+  "validADorPLField(AD)",
+  "validADorPLField(PL)",
+  "extendedAttributes != null",
+  "! hasForbiddenKey(extendedAttributes)"))
+class FastGenotype( private val sampleName : String,
+                    private val alleles: Array[Allele],
+                    private val _isPhased : Boolean,
+                    private val GQ : Int,
+                    private val DP : Int,
+                    private val AD : Array[Int],
+                    private val PL : Array[Int],
+                    private val filters : String,
+                    private val extendedAttributes : immutable.Map[String, Any]) extends Genotype(sampleName,filters)
+{
 
-    // ---------------------------------------------------------------------------------------------------------
-    //
-    // Implmenting the abstract methods
-    //
-    // ---------------------------------------------------------------------------------------------------------
 
-    @Override public List<Allele> getAlleles() {
-        return alleles;
-    }
+  // ---------------------------------------------------------------------------------------------------------
+  //
+  // Implmenting the abstract methods
+  //
+  // ---------------------------------------------------------------------------------------------------------
 
-    @Override public Allele getAllele(int i) {
-        return alleles.get(i);
-    }
+  override def getAlleles() : Array[Allele] ={ alleles }
 
-    @Override public boolean isPhased() {
-        return isPhased;
-    }
+  override def getAllele( i : Int) : Allele = { alleles(i) }
 
-    @Override public int getDP() {
-        return DP;
-    }
+  override def isPhased() : Boolean =  { _isPhased }
 
-    @Override public int[] getAD() {
-        return AD;
-    }
+  override def getDP() : Int = { DP  }
 
-    @Override public int getGQ()  {
-        return GQ;
-    }
+  override def  getAD() : Array[Int] = { AD }
 
-    @Override public int[] getPL() {
-        return PL;
-    }
+  override def  getGQ() : Int = { GQ  }
 
-    // ---------------------------------------------------------------------------------------------------------
-    // 
-    // get routines for extended attributes
-    //
-    // ---------------------------------------------------------------------------------------------------------
+  override  def getPL() : Array[Int] = { PL }
 
-    public Map<String, Object> getExtendedAttributes() {
-        return extendedAttributes;
-    }
+  // ---------------------------------------------------------------------------------------------------------
+  //
+  // get routines for extended attributes
+  //
+  // ---------------------------------------------------------------------------------------------------------
 
-    /**
-     * Is values a valid AD or PL field
-     * @param values
-     * @return
-     */
-    private static boolean validADorPLField(final int[] values) {
-        if ( values != null )
-            for ( int v : values )
-                if ( v < 0 )
-                    return false;
-        return true;
-    }
+  def getExtendedAttributes()  : immutable.Map[String, Any] = { extendedAttributes }
+
+
 }
+
+
+

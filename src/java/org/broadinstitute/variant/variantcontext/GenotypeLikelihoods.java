@@ -190,7 +190,7 @@ public class GenotypeLikelihoods {
     }
 
     public double getLog10GQ(Genotype genotype, List<Allele> vcAlleles ) {
-        return getLog10GQ(genotype.getAlleles(),vcAlleles);
+        return getLog10GQ(Arrays.asList(genotype.getAlleles()),vcAlleles);
     }
 
     public double getLog10GQ(Genotype genotype, VariantContext context) {

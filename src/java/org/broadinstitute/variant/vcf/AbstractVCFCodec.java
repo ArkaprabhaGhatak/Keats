@@ -672,7 +672,13 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                         // if its truly missing (there no provided value) skip adding it to the attributes
                     } else if (gtKey.equals(VCFConstants.GENOTYPE_FILTER_KEY)) {
                         final List<String> filters = parseFilters(getCachedString(GTValueArray[i]));
-                        if ( filters != null ) gb.filters(filters);
+                        if ( filters != null )
+                        {
+                            String[] fArr = new String[filters.size()];
+                            fArr = filters.toArray(fArr);
+
+                            gb.filters(fArr);
+                        }
                     } else if ( GTValueArray[i].equals(VCFConstants.MISSING_VALUE_v4) ) {
                         // don't add missing values to the map
                     } else {
@@ -703,7 +709,12 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                 generateException("Saw GT field at position " + genotypeAlleleLocation + ", but it must be at the first position for genotypes when present");
 
             final List<Allele> GTalleles = (genotypeAlleleLocation == -1 ? new ArrayList<Allele>(0) : parseGenotypeAlleles(GTValueArray[genotypeAlleleLocation], alleles, alleleMap));
-            gb.alleles(GTalleles);
+
+
+            Allele[] aArr = new Allele[GTalleles.size()];
+            aArr = GTalleles.toArray(aArr);
+
+            gb.alleles(aArr);
             gb.phased(genotypeAlleleLocation != -1 && GTValueArray[genotypeAlleleLocation].indexOf(VCFConstants.PHASED) != -1);
 
             // add it to the list

@@ -248,7 +248,7 @@ public class VariantContext implements Feature { // to enable tribble integratio
         boolean sawAD = false;
         boolean sawPL = false;
         for (final Genotype g : this.getGenotypes()) {
-            keys.addAll(g.getExtendedAttributes().keySet());
+            keys.addAll(scala.collection.JavaConversions.asJavaSet(g.getExtendedAttributes().keySet()));
             if ( g.isAvailable() ) sawGoodGT = true;
             if ( g.hasGQ() ) sawGoodQual = true;
             if ( g.hasDP() ) sawDP = true;
@@ -1157,7 +1157,7 @@ public class VariantContext implements Feature { // to enable tribble integratio
         observedAlleles.add(getReference());
         for ( final Genotype g : getGenotypes() ) {
             if ( g.isCalled() )
-                observedAlleles.addAll(g.getAlleles());
+                observedAlleles.addAll(Arrays.asList(g.getAlleles()));
         }
         if ( observedAlleles.contains(Allele.NO_CALL()) )
             observedAlleles.remove(Allele.NO_CALL());
@@ -1574,8 +1574,8 @@ public class VariantContext implements Feature { // to enable tribble integratio
     }
 
     private final Genotype fullyDecodeGenotypes(final Genotype g, final VCFHeader header) {
-        final Map<String, Object> map = fullyDecodeAttributes(g.getExtendedAttributes(), header, true);
-        return new GenotypeBuilder(g).attributes(map).make();
+        final Map<String, Object> map = fullyDecodeAttributes(scala.collection.JavaConversions.asJavaMap(g.getExtendedAttributes()), header, true);
+        return new GenotypeBuilder(g).attributesMapFromJava(scala.collection.JavaConversions.asScalaMap(map)).make();
     }
 
     // ---------------------------------------------------------------------------------------------------------

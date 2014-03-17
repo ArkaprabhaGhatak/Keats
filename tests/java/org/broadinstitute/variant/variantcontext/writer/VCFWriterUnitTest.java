@@ -126,12 +126,17 @@ public class VCFWriterUnitTest extends VariantBaseTest {
         final Map<String, Object> attributes = new HashMap<String,Object>();
         final GenotypesContext genotypes = GenotypesContext.create(header.getGenotypeSamples().size());
 
-        alleles.add(Allele.apply("A",true));
-        alleles.add(Allele.apply("ACC",false));
+        alleles.add(Allele.apply("A", true));
+        alleles.add(Allele.apply("ACC", false));
 
         attributes.put("DP","50");
-        for (final String name : header.getGenotypeSamples()) {
-            final Genotype gt = new GenotypeBuilder(name,alleles.subList(1,2)).GQ(0).attribute("BB", "1").phased(true).make();
+        for (final String name : header.getGenotypeSamples())
+        {
+            List<Allele> aList =  alleles.subList(1,2);
+            Allele[] aArr = new Allele[aList.size()];
+            aArr = aList.toArray(aArr);
+
+            final Genotype gt = new GenotypeBuilder(name,aArr).GQ(0).attribute("BB", "1").phased(true).make();
             genotypes.add(gt);
         }
         return new VariantContextBuilder("RANDOM", chrom, position, position, alleles)

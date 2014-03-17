@@ -100,7 +100,7 @@ class JEXLMap implements Map<JexlVCMatchExp, Boolean> {
                 infoMap.put(VCFConstants.GENOTYPE_QUALITY_KEY, g.getGQ());
                 if ( g.hasDP() )
                     infoMap.put(VCFConstants.DEPTH_KEY, g.getDP());
-                for ( Entry<String, Object> e : g.getExtendedAttributes().entrySet() ) {
+                for ( Entry<String, Object> e : scala.collection.JavaConversions.asJavaMap(g.getExtendedAttributes()).entrySet() ) {
                     if ( e.getValue() != null && !e.getValue().equals(VCFConstants.MISSING_VALUE_v4) )
                         infoMap.put(e.getKey(), e.getValue());
                 }

@@ -359,56 +359,56 @@ public class VariantContextTestProvider {
         // test ref/ref
         final Allele ref = site.getReference();
         final Allele alt1 = site.getNAlleles() > 1 ? site.getAlternateAllele(0) : null;
-        final Genotype homRef = GenotypeBuilder.create("homRef", Arrays.asList(ref, ref));
+        final Genotype homRef = GenotypeBuilder.apply("homRef", new Allele[]{ref, ref});
         addGenotypeTests(site, homRef);
 
         if ( alt1 != null ) {
-            final Genotype het = GenotypeBuilder.create("het", Arrays.asList(ref, alt1));
-            final Genotype homVar = GenotypeBuilder.create("homVar", Arrays.asList(alt1, alt1));
+            final Genotype het = GenotypeBuilder.apply("het", new Allele[]{ref, alt1});
+            final Genotype homVar = GenotypeBuilder.apply("homVar", new Allele[]{alt1, alt1});
             addGenotypeTests(site, homRef, het);
             addGenotypeTests(site, homRef, het, homVar);
 
             // test no GT at all
-            addGenotypeTests(site, new GenotypeBuilder("noGT", new ArrayList<Allele>(0)).attribute("INT1", 10).make());
+            addGenotypeTests(site, new GenotypeBuilder("noGT", new Allele[]{}).attribute("INT1", 10).make());
 
-            final List<Allele> noCall = Arrays.asList(Allele.NO_CALL(), Allele.NO_CALL());
+            final Allele[] noCall = new Allele[]{Allele.NO_CALL(), Allele.NO_CALL()};
 
             // ploidy
             if ( ENABLE_PLOIDY_TESTS ) {
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("hap", Arrays.asList(ref)));
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("hap", new Allele[]{ref}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("noCall", noCall),
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("hap", Arrays.asList(ref)));
+                        GenotypeBuilder.apply("noCall", noCall),
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("hap", new Allele[]{ref}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("noCall",  noCall),
-                        GenotypeBuilder.create("noCall2", noCall),
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("hap", Arrays.asList(ref)));
+                        GenotypeBuilder.apply("noCall",  noCall),
+                        GenotypeBuilder.apply("noCall2", noCall),
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("hap", new Allele[]{ref}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("tet", Arrays.asList(ref, alt1, alt1)));
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("tet", new Allele[]{ref, alt1, alt1}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("noCall", noCall),
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("tet", Arrays.asList(ref, alt1, alt1)));
+                        GenotypeBuilder.apply("noCall", noCall),
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("tet", new Allele[]{ref, alt1, alt1}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("noCall", noCall),
-                        GenotypeBuilder.create("noCall2", noCall),
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("tet", Arrays.asList(ref, alt1, alt1)));
+                        GenotypeBuilder.apply("noCall", noCall),
+                        GenotypeBuilder.apply("noCall2", noCall),
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("tet", new Allele[]{ref, alt1, alt1}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("nocall", noCall),
-                        GenotypeBuilder.create("dip", Arrays.asList(ref, alt1)),
-                        GenotypeBuilder.create("tet", Arrays.asList(ref, alt1, alt1)));
+                        GenotypeBuilder.apply("nocall", noCall),
+                        GenotypeBuilder.apply("dip", new Allele[]{ref, alt1}),
+                        GenotypeBuilder.apply("tet", new Allele[]{ref, alt1, alt1}));
             }
 
 
@@ -417,11 +417,11 @@ public class VariantContextTestProvider {
             // TESTING PHASE
             //
             //
-            final Genotype gUnphased = new GenotypeBuilder("gUnphased", Arrays.asList(ref, alt1)).make();
-            final Genotype gPhased = new GenotypeBuilder("gPhased", Arrays.asList(ref, alt1)).phased(true).make();
-            final Genotype gPhased2 = new GenotypeBuilder("gPhased2", Arrays.asList(alt1, alt1)).phased(true).make();
-            final Genotype gPhased3 = new GenotypeBuilder("gPhased3", Arrays.asList(ref, ref)).phased(true).make();
-            final Genotype haploidNoPhase = new GenotypeBuilder("haploidNoPhase", Arrays.asList(ref)).make();
+            final Genotype gUnphased = new GenotypeBuilder("gUnphased", new Allele[]{ref, alt1}).make();
+            final Genotype gPhased = new GenotypeBuilder("gPhased", new Allele[]{ref, alt1}).phased(true).make();
+            final Genotype gPhased2 = new GenotypeBuilder("gPhased2", new Allele[]{alt1, alt1}).phased(true).make();
+            final Genotype gPhased3 = new GenotypeBuilder("gPhased3", new Allele[]{ref, ref}).phased(true).make();
+            final Genotype haploidNoPhase = new GenotypeBuilder("haploidNoPhase", new Allele[]{ref}).make();
             addGenotypeTests(site, gUnphased, gPhased);
             addGenotypeTests(site, gUnphased, gPhased2);
             addGenotypeTests(site, gUnphased, gPhased3);
@@ -436,8 +436,8 @@ public class VariantContextTestProvider {
             addGenotypeTests(site, haploidNoPhase, gPhased2, gPhased3);
             addGenotypeTests(site, haploidNoPhase, gPhased, gPhased2, gPhased3);
 
-            final Genotype gUnphasedTet = new GenotypeBuilder("gUnphasedTet", Arrays.asList(ref, alt1, ref, alt1)).make();
-            final Genotype gPhasedTet = new GenotypeBuilder("gPhasedTet", Arrays.asList(ref, alt1, alt1, alt1)).phased(true).make();
+            final Genotype gUnphasedTet = new GenotypeBuilder("gUnphasedTet", new Allele[]{ref, alt1, ref, alt1}).make();
+            final Genotype gPhasedTet = new GenotypeBuilder("gPhasedTet", new Allele[]{ref, alt1, alt1, alt1}).phased(true).make();
             addGenotypeTests(site, gUnphasedTet, gPhasedTet);
         }
 
@@ -445,26 +445,26 @@ public class VariantContextTestProvider {
             if ( site.getNAlleles() == 2 ) {
                 // testing PLs
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("g1", Arrays.asList(ref, ref), new double[]{0, -1, -2}),
-                        GenotypeBuilder.create("g2", Arrays.asList(ref, ref), new double[]{0, -2, -3}));
+                        GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{0, -1, -2}),
+                        GenotypeBuilder.apply("g2", new Allele[]{ref, ref}, new double[]{0, -2, -3}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("g1", Arrays.asList(ref, ref), new double[]{-1, 0, -2}),
-                        GenotypeBuilder.create("g2", Arrays.asList(ref, ref), new double[]{0, -2, -3}));
+                        GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{-1, 0, -2}),
+                        GenotypeBuilder.apply("g2", new Allele[]{ref, ref}, new double[]{0, -2, -3}));
 
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("g1", Arrays.asList(ref, ref), new double[]{-1, 0, -2}),
-                        GenotypeBuilder.create("g2", Arrays.asList(ref, ref), new double[]{0, -2000, -1000}));
+                        GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{-1, 0, -2}),
+                        GenotypeBuilder.apply("g2", new Allele[]{ref, ref}, new double[]{0, -2000, -1000}));
 
                 addGenotypeTests(site, // missing PLs
-                        GenotypeBuilder.create("g1", Arrays.asList(ref, ref), new double[]{-1, 0, -2}),
-                        GenotypeBuilder.create("g2", Arrays.asList(ref, ref)));
+                        GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{-1, 0, -2}),
+                        GenotypeBuilder.apply("g2", new Allele[]{ref, ref}));
             }
             else if ( site.getNAlleles() == 3 ) {
                 // testing PLs
                 addGenotypeTests(site,
-                        GenotypeBuilder.create("g1", Arrays.asList(ref, ref), new double[]{0, -1, -2, -3, -4, -5}),
-                        GenotypeBuilder.create("g2", Arrays.asList(ref, ref), new double[]{0, -2, -3, -4, -5, -6}));
+                        GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{0, -1, -2, -3, -4, -5}),
+                        GenotypeBuilder.apply("g2", new Allele[]{ref, ref}, new double[]{0, -2, -3, -4, -5, -6}));
             }
         }
 
@@ -545,18 +545,18 @@ public class VariantContextTestProvider {
         //
         //
         addGenotypeTests(site,
-                new GenotypeBuilder("g1-x", Arrays.asList(ref, ref)).filters("X").make(),
-                new GenotypeBuilder("g2-x", Arrays.asList(ref, ref)).filters("X").make());
+                new GenotypeBuilder("g1-x", new Allele[]{ref, ref}).filters(new String[]{"X"}).make(),
+                new GenotypeBuilder("g2-x", new Allele[]{ref, ref}).filters(new String[]{"X"}).make());
         addGenotypeTests(site,
-                new GenotypeBuilder("g1-unft", Arrays.asList(ref, ref)).unfiltered().make(),
-                new GenotypeBuilder("g2-x", Arrays.asList(ref, ref)).filters("X").make());
+                new GenotypeBuilder("g1-unft", new Allele[]{ref, ref}).unfiltered().make(),
+                new GenotypeBuilder("g2-x", new Allele[]{ref, ref}).filters(new String[]{"X"}).make());
         addGenotypeTests(site,
-                new GenotypeBuilder("g1-unft", Arrays.asList(ref, ref)).unfiltered().make(),
-                new GenotypeBuilder("g2-xy", Arrays.asList(ref, ref)).filters("X", "Y").make());
+                new GenotypeBuilder("g1-unft", new Allele[]{ref, ref}).unfiltered().make(),
+                new GenotypeBuilder("g2-xy", new Allele[]{ref, ref}).filters(new String[]{"X", "Y"}).make());
         addGenotypeTests(site,
-                new GenotypeBuilder("g1-unft", Arrays.asList(ref, ref)).unfiltered().make(),
-                new GenotypeBuilder("g2-x", Arrays.asList(ref, ref)).filters("X").make(),
-                new GenotypeBuilder("g3-xy", Arrays.asList(ref, ref)).filters("X", "Y").make());
+                new GenotypeBuilder("g1-unft", new Allele[]{ref, ref}).unfiltered().make(),
+                new GenotypeBuilder("g2-x", new Allele[]{ref, ref}).filters(new String[]{"X"}).make(),
+                new GenotypeBuilder("g3-xy", new Allele[]{ref, ref}).filters(new String[]{"X", "Y"}).make());
     }
 
     private static void addGenotypesAndGTests() {
@@ -589,7 +589,12 @@ public class VariantContextTestProvider {
                 for ( int i = 0; i < pl.length; i++ ) pl[i] = i;
 
                 final GenotypeBuilder gb = new GenotypeBuilder("ADA_PL_SAMPLE");
-                gb.alleles(baseGenotype);
+
+
+                Allele[] aArr = new Allele[baseGenotype.size()];
+                aArr = baseGenotype.toArray(aArr);
+
+                gb.alleles(aArr);
                 gb.PL(pl);
                 gb.attribute("ADA", nAlleles == 2 ? ada.get(0) : ada);
                 vcb.genotypes(gb.make());
@@ -601,10 +606,10 @@ public class VariantContextTestProvider {
 
     private static Genotype attr(final String name, final Allele ref, final String key, final Object ... value) {
         if ( value.length == 0 )
-            return GenotypeBuilder.create(name, Arrays.asList(ref, ref));
+            return GenotypeBuilder.apply(name, new Allele[]{ref, ref});
         else {
             final Object toAdd = value.length == 1 ? value[0] : Arrays.asList(value);
-            return new GenotypeBuilder(name, Arrays.asList(ref, ref)).attribute(key, toAdd).make();
+            return new GenotypeBuilder(name, new Allele[]{ref, ref}).attribute(key, toAdd).make();
         }
     }
 
@@ -855,7 +860,7 @@ public class VariantContextTestProvider {
         Assert.assertTrue(Arrays.equals(actual.getPL(), expected.getPL()));
 
         Assert.assertEquals(actual.getPhredScaledQual(), expected.getPhredScaledQual(), "Genotype phredScaledQual");
-        assertAttributesEquals(actual.getExtendedAttributes(), expected.getExtendedAttributes());
+        assertAttributesEquals(scala.collection.JavaConversions.asJavaMap(actual.getExtendedAttributes()), scala.collection.JavaConversions.asJavaMap(expected.getExtendedAttributes()));
         Assert.assertEquals(actual.isPhased(), expected.isPhased(), "Genotype isPhased");
         Assert.assertEquals(actual.getPloidy(), expected.getPloidy(), "Genotype getPloidy");
     }
@@ -936,7 +941,13 @@ public class VariantContextTestProvider {
                 // first test -- create n copies of each genotype
                 for ( int i = 0; i < nPossibleGenotypes; i++ ) {
                     final List<Genotype> samples = new ArrayList<Genotype>(3);
-                    samples.add(GenotypeBuilder.create("sample" + i, possibleGenotypes.get(i)));
+
+                    List<Allele> aList = possibleGenotypes.get(i);
+                    Allele[] aArr = new Allele[aList.size()];
+                    aArr = aList.toArray(aArr);
+
+
+                    samples.add(GenotypeBuilder.apply("sample" + i, aArr));
                     add(vb.genotypes(samples));
                 }
 
@@ -944,7 +955,13 @@ public class VariantContextTestProvider {
                 {
                     final List<Genotype> samples = new ArrayList<Genotype>(nPossibleGenotypes);
                     for ( int i = 0; i < nPossibleGenotypes; i++ ) {
-                        samples.add(GenotypeBuilder.create("sample" + i, possibleGenotypes.get(i)));
+
+                        List<Allele> aList = possibleGenotypes.get(i);
+                        Allele[] aArr = new Allele[aList.size()];
+                        aArr = aList.toArray(aArr);
+
+
+                        samples.add(GenotypeBuilder.apply("sample" + i, aArr));
                     }
                     add(vb.genotypes(samples));
                 }
@@ -954,7 +971,13 @@ public class VariantContextTestProvider {
                     for ( int ploidy = 1; ploidy < highestPloidy; ploidy++ ) {
                         final List<Genotype> samples = new ArrayList<Genotype>(highestPloidy);
                         final List<Allele> genotype = possibleGenotypes.get(i).subList(0, ploidy);
-                        samples.add(GenotypeBuilder.create("sample" + i, genotype));
+
+                        List<Allele> aList = genotype;
+                        Allele[] aArr = new Allele[aList.size()];
+                        aArr = aList.toArray(aArr);
+
+
+                        samples.add(GenotypeBuilder.apply("sample" + i, aArr));
                         add(vb.genotypes(samples));
                     }
                 }
