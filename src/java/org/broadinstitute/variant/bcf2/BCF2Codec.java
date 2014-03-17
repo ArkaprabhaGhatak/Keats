@@ -341,7 +341,7 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
             final String alleleBases = (String)decoder.decodeTypedValue();
 
             final boolean isRef = i == 0;
-            final Allele allele = Allele.create(alleleBases, isRef);
+            final Allele allele = Allele.apply(alleleBases, isRef);
             if ( isRef ) ref = alleleBases;
 
             alleles.add(allele);

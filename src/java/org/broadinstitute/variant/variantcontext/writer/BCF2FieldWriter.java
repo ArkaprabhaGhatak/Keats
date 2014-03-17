@@ -309,7 +309,7 @@ public abstract class BCF2FieldWriter {
         private final int getAlleleOffset(final Allele a) {
             if ( a == ref ) return 0;
             else if ( a == alt1 ) return 1;
-            else if ( a == Allele.NO_CALL ) return -1;
+            else if ( a == Allele.NO_CALL() ) return -1;
             else {
                 final Integer o = alleleMapForTriPlus.get(a);
                 if ( o == null ) throw new IllegalStateException("BUG: Couldn't find allele offset for allele " + a);

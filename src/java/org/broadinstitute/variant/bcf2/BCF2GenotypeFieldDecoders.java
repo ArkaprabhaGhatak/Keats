@@ -210,7 +210,7 @@ public class BCF2GenotypeFieldDecoders {
         @Ensures("result != null")
         private final Allele getAlleleFromEncoded(final List<Allele> siteAlleles, final int encode) {
             final int offset = encode >> 1;
-            return offset == 0 ? Allele.NO_CALL : siteAlleles.get(offset - 1);
+            return offset == 0 ? Allele.NO_CALL() : siteAlleles.get(offset - 1);
         }
     }
 

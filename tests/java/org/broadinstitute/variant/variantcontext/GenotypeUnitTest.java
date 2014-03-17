@@ -40,9 +40,9 @@ public class GenotypeUnitTest extends VariantBaseTest {
 
     @BeforeSuite
     public void before() {
-        A = Allele.create("A");
-        Aref = Allele.create("A", true);
-        T = Allele.create("T");
+        A = Allele.apply("A");
+        Aref = Allele.apply("A", true);
+        T = Allele.apply("T");
     }
 
     private static final GenotypeBuilder makeGB() {

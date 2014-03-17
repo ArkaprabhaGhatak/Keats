@@ -153,9 +153,9 @@ public class GenotypeLikelihoodsUnitTest extends VariantBaseTest {
 
     public void testGetQualFromLikelihoodsMultiAllelic() {
         GenotypeLikelihoods gl = GenotypeLikelihoods.fromLog10Likelihoods(triAllelic);
-        Allele ref = Allele.create((byte)'A',true);
-        Allele alt1 = Allele.create((byte)'C');
-        Allele alt2 = Allele.create((byte)'T');
+        Allele ref = Allele.apply((byte)'A',true);
+        Allele alt1 = Allele.apply((byte)'C');
+        Allele alt2 = Allele.apply((byte)'T');
         List<Allele> allAlleles = Arrays.asList(ref,alt1,alt2);
         List<Allele> gtAlleles = Arrays.asList(alt1,alt2);
         GenotypeBuilder gtBuilder = new GenotypeBuilder();

@@ -67,13 +67,13 @@ public class VariantJEXLContextUnitTest extends VariantBaseTest {
 
     @BeforeMethod
     public void before() {
-        A = Allele.create("A");
-        Aref = Allele.create("A", true);
-        T = Allele.create("T");
-        Tref = Allele.create("T", true);
+        A = Allele.apply("A");
+        Aref = Allele.apply("A", true);
+        T = Allele.apply("T");
+        Tref = Allele.apply("T", true);
 
-        ATC = Allele.create("ATC");
-        ATCref = Allele.create("ATC", true);
+        ATC = Allele.apply("ATC");
+        ATCref = Allele.apply("ATC", true);
     }
 
 

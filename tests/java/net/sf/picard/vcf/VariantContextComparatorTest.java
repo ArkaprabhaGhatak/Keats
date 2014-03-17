@@ -39,8 +39,8 @@ public class VariantContextComparatorTest {
 
 	private static VariantContext buildVariantContext(final String source, final String contig, final long start) {
 		final Collection<Allele> alleles = new ArrayList<Allele>();
-		alleles.add(Allele.create("AAAA", true));
-		alleles.add(Allele.create("AAGG", false));
+		alleles.add(Allele.apply("AAAA", true));
+		alleles.add(Allele.apply("AAGG", false));
 		return new VariantContextBuilder(source, contig, start, start + 3, alleles).make();
 	}
 

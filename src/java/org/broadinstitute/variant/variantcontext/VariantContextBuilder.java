@@ -157,7 +157,7 @@ public class VariantContextBuilder {
         List<Allele> alleles = new ArrayList<Allele>(alleleStrings.size());
 
         for ( int i = 0; i < alleleStrings.size(); i++ ) {
-            alleles.add(Allele.create(alleleStrings.get(i), i == 0));
+            alleles.add(Allele.apply(alleleStrings.get(i), i == 0));
         }
 
         return alleles(alleles);

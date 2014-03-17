@@ -47,9 +47,9 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
 
     @BeforeSuite
     public void before() {
-        C = Allele.create("C");
-        Aref = Allele.create("A", true);
-        T = Allele.create("T");
+        C = Allele.apply("C");
+        Aref = Allele.apply("A", true);
+        T = Allele.apply("T");
         AA = GenotypeBuilder.create("AA", Arrays.asList(Aref, Aref));
         AT = GenotypeBuilder.create("AT", Arrays.asList(Aref, T));
         TT = GenotypeBuilder.create("TT", Arrays.asList(T, T));

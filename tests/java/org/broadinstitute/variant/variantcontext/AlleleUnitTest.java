@@ -50,14 +50,14 @@ public class AlleleUnitTest extends VariantBaseTest {
     
     @BeforeSuite
     public void before() {
-        A = Allele.create("A");
-        ARef = Allele.create("A", true);
-        T = Allele.create("T");
+        A = Allele.apply("A");
+        ARef = Allele.apply("A", true);
+        T = Allele.apply("T");
 
-        ATIns = Allele.create("AT");
-        ATCIns = Allele.create("ATC");
+        ATIns = Allele.apply("AT");
+        ATCIns = Allele.apply("ATC");
 
-        NoCall = Allele.create(".");
+        NoCall = Allele.apply(".");
     }
 
     @Test
@@ -100,10 +100,10 @@ public class AlleleUnitTest extends VariantBaseTest {
 
     @Test
     public void testConstructors1() {
-        Allele a1 = Allele.create("A");
-        Allele a2 = Allele.create("A".getBytes());
-        Allele a3 = Allele.create("A");
-        Allele a4 = Allele.create("A", true);
+        Allele a1 = Allele.apply("A");
+        Allele a2 = Allele.apply("A".getBytes());
+        Allele a3 = Allele.apply("A");
+        Allele a4 = Allele.apply("A", true);
 
         Assert.assertTrue(a1.equals(a2));
         Assert.assertTrue(a1.equals(a3));
@@ -112,10 +112,10 @@ public class AlleleUnitTest extends VariantBaseTest {
 
     @Test
     public void testInsConstructors() {
-        Allele a1 = Allele.create("AC");
-        Allele a2 = Allele.create("AC".getBytes());
-        Allele a3 = Allele.create("AC");
-        Allele a4 = Allele.create("AC", true);
+        Allele a1 = Allele.apply("AC");
+        Allele a2 = Allele.apply("AC".getBytes());
+        Allele a3 = Allele.apply("AC");
+        Allele a4 = Allele.apply("AC", true);
 
         Assert.assertTrue(a1.equals(a2));
         Assert.assertTrue(a1.equals(a3));
@@ -146,35 +146,35 @@ public class AlleleUnitTest extends VariantBaseTest {
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void testBadConstructorArgs1() {
         byte[] foo = null;
-        Allele.create(foo);
+        Allele.apply(foo);
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void testBadConstructorArgs2() {
-        Allele.create("x");
+        Allele.apply("x");
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void testBadConstructorArgs3() {
-        Allele.create("--");
+        Allele.apply("--");
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void testBadConstructorArgs4() {
-        Allele.create("-A");
+        Allele.apply("-A");
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void testBadConstructorArgs5() {
-        Allele.create("A A");
+        Allele.apply("A A");
     }
 
     @Test
     public void testExtend() {
-        Assert.assertEquals("AT", Allele.extend(Allele.create("A"), "T".getBytes()).toString());
-        Assert.assertEquals("ATA", Allele.extend(Allele.create("A"), "TA".getBytes()).toString());
-        Assert.assertEquals("A", Allele.extend(Allele.NO_CALL, "A".getBytes()).toString());
-        Assert.assertEquals("ATCGA", Allele.extend(Allele.create("AT"), "CGA".getBytes()).toString());
-        Assert.assertEquals("ATCGA", Allele.extend(Allele.create("ATC"), "GA".getBytes()).toString());
+        Assert.assertEquals("AT", Allele.extend(Allele.apply("A"), "T".getBytes()).toString());
+        Assert.assertEquals("ATA", Allele.extend(Allele.apply("A"), "TA".getBytes()).toString());
+        Assert.assertEquals("A", Allele.extend(Allele.NO_CALL(), "A".getBytes()).toString());
+        Assert.assertEquals("ATCGA", Allele.extend(Allele.apply("AT"), "CGA".getBytes()).toString());
+        Assert.assertEquals("ATCGA", Allele.extend(Allele.apply("ATC"), "GA".getBytes()).toString());
     }
 }

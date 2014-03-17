@@ -126,8 +126,8 @@ public class VCFWriterUnitTest extends VariantBaseTest {
         final Map<String, Object> attributes = new HashMap<String,Object>();
         final GenotypesContext genotypes = GenotypesContext.create(header.getGenotypeSamples().size());
 
-        alleles.add(Allele.create("A",true));
-        alleles.add(Allele.create("ACC",false));
+        alleles.add(Allele.apply("A",true));
+        alleles.add(Allele.apply("ACC",false));
 
         attributes.put("DP","50");
         for (final String name : header.getGenotypeSamples()) {

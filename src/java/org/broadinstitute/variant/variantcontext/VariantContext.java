@@ -748,7 +748,11 @@ public class VariantContext implements Feature { // to enable tribble integratio
      * @return The allele sharing the same bases as this byte[], or null if no such allele is present.
      */
     public Allele getAllele(byte[] allele) {
-        return Allele.getMatchingAllele(getAlleles(), allele);
+        List<Allele> aList = getAlleles();
+        Allele[] aArray = new Allele[aList.size()];
+        aArray = aList.toArray(aArray);
+
+        return Allele.getMatchingAllele(aArray, allele);
     }
 
     /**
@@ -1155,8 +1159,8 @@ public class VariantContext implements Feature { // to enable tribble integratio
             if ( g.isCalled() )
                 observedAlleles.addAll(g.getAlleles());
         }
-        if ( observedAlleles.contains(Allele.NO_CALL) )
-            observedAlleles.remove(Allele.NO_CALL);
+        if ( observedAlleles.contains(Allele.NO_CALL()) )
+            observedAlleles.remove(Allele.NO_CALL());
 
         if ( reportedAlleles.size() != observedAlleles.size() )
             throw new TribbleException.InternalCodecException(String.format("one or more of the ALT allele(s) for the record at position %s:%d are not observed at all in the sample genotypes", getChr(), getStart()));

@@ -435,7 +435,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
      */
     protected static Allele oneAllele(String index, List<Allele> alleles) {
         if ( index.equals(VCFConstants.EMPTY_ALLELE) )
-            return Allele.NO_CALL;
+            return Allele.NO_CALL();
         final int i;
         try {
             i = Integer.valueOf(index);
@@ -503,7 +503,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         List<Allele> alleles = new ArrayList<Allele>(2); // we are almost always biallelic
         // ref
         checkAllele(ref, true, lineNo);
-        Allele refAllele = Allele.create(ref, true);
+        Allele refAllele = Allele.apply(ref, true);
         alleles.add(refAllele);
 
         if ( alts.indexOf(",") == -1 ) // only 1 alternatives, don't call string split
@@ -582,7 +582,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
     private static void parseSingleAltAllele(List<Allele> alleles, String alt, int lineNo) {
         checkAllele(alt, false, lineNo);
 
-        Allele allele = Allele.create(alt, false);
+        Allele allele = Allele.apply(alt, false);
         if ( ! allele.isNoCall() )
             alleles.add(allele);
     }

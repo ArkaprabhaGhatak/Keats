@@ -54,8 +54,8 @@ import java.util.*;
  */
 @Invariant({"alleles != null"})
 public final class GenotypeBuilder {
-    private static final List<Allele> HAPLOID_NO_CALL = Arrays.asList(Allele.NO_CALL);
-    private static final List<Allele> DIPLOID_NO_CALL = Arrays.asList(Allele.NO_CALL, Allele.NO_CALL);
+    private static final List<Allele> HAPLOID_NO_CALL = Arrays.asList(Allele.NO_CALL());
+    private static final List<Allele> DIPLOID_NO_CALL = Arrays.asList(Allele.NO_CALL(), Allele.NO_CALL());
 
     private String sampleName = null;
     private List<Allele> alleles = Collections.emptyList();
@@ -106,7 +106,7 @@ public final class GenotypeBuilder {
         switch ( ploidy ) {
             case 1:  builder.alleles(HAPLOID_NO_CALL); break;
             case 2:  builder.alleles(DIPLOID_NO_CALL); break;
-            default: builder.alleles(Collections.nCopies(ploidy, Allele.NO_CALL)); break;
+            default: builder.alleles(Collections.nCopies(ploidy, Allele.NO_CALL())); break;
         }
         return builder.make();
     }

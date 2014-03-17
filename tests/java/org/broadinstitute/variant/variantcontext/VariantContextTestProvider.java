@@ -371,7 +371,7 @@ public class VariantContextTestProvider {
             // test no GT at all
             addGenotypeTests(site, new GenotypeBuilder("noGT", new ArrayList<Allele>(0)).attribute("INT1", 10).make());
 
-            final List<Allele> noCall = Arrays.asList(Allele.NO_CALL, Allele.NO_CALL);
+            final List<Allele> noCall = Arrays.asList(Allele.NO_CALL(), Allele.NO_CALL());
 
             // ploidy
             if ( ENABLE_PLOIDY_TESTS ) {
@@ -914,9 +914,9 @@ public class VariantContextTestProvider {
 
     public static void addComplexGenotypesTest() {
         final List<Allele> allAlleles = Arrays.asList(
-                Allele.create("A", true),
-                Allele.create("C", false),
-                Allele.create("G", false));
+                Allele.apply("A", true),
+                Allele.apply("C", false),
+                Allele.apply("G", false));
 
         for ( int nAlleles : Arrays.asList(2, 3) ) {
             for ( int highestPloidy : Arrays.asList(1, 2, 3) ) {
@@ -925,7 +925,7 @@ public class VariantContextTestProvider {
 
                 // possible alleles for genotypes
                 final List<Allele> possibleGenotypeAlleles = new ArrayList<Allele>(siteAlleles);
-                possibleGenotypeAlleles.add(Allele.NO_CALL);
+                possibleGenotypeAlleles.add(Allele.NO_CALL());
 
                 // there are n^ploidy possible genotypes
                 final List<List<Allele>> possibleGenotypes = makeAllGenotypes(possibleGenotypeAlleles, highestPloidy);

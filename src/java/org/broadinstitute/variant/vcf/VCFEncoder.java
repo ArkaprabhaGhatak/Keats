@@ -362,7 +362,7 @@ public class VCFEncoder {
 
 	private Map<Allele, String> buildAlleleStrings(final VariantContext vc) {
 		final Map<Allele, String> alleleMap = new HashMap<Allele, String>(vc.getAlleles().size()+1);
-		alleleMap.put(Allele.NO_CALL, VCFConstants.EMPTY_ALLELE); // convenience for lookup
+		alleleMap.put(Allele.NO_CALL(), VCFConstants.EMPTY_ALLELE); // convenience for lookup
 
 		final List<Allele> alleles = vc.getAlleles();
 		for ( int i = 0; i < alleles.size(); i++ ) {
