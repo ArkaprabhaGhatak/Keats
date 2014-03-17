@@ -24,20 +24,19 @@
 */
 
 /**
- * Created by Wim Spee on 2/20/14.
+ * Ported to Scala by Wim Spee on 2/20/14.
  */
 
 
 package org.broadinstitute.variant.variantcontext
 
 import com.google.java.contract._
-import org.broad.tribble.util.ParsingUtils
 import org.broadinstitute.variant.vcf.VCFConstants
 
 
 
 import scala.collection._
-import javax.management.remote.rmi._RMIConnection_Stub
+
 
 /**
  * This class encompasses all the basic information about a genotype.  It is immutable.
@@ -52,7 +51,7 @@ import javax.management.remote.rmi._RMIConnection_Stub
 
 abstract class Genotype(private val sampleName: String, private val filters: String) extends Comparable[Genotype] {
 
-  private var gType : GenotypeType = null;
+  private lazy val gType : GenotypeType = determineType()
 
   /**
    * @return the alleles for this genotype.  Cannot be null.  May be empty
@@ -161,11 +160,7 @@ abstract class Genotype(private val sampleName: String, private val filters: Str
    * @return the high-level type of this sample's genotype
    */
   @Ensures(Array[String]("type != null", "result != null"))
-  def getType() : GenotypeType = {
-    if ( gType == null ) { gType = determineType();gType  }
-    else{gType;}
-
-  }
+  def getType() : GenotypeType = { gType }
 
   /**
    * Internal code to determine the type of the genotype from the alleles vector
@@ -173,6 +168,7 @@ abstract class Genotype(private val sampleName: String, private val filters: Str
    */
   @Requires(Array[String]("type == null")) // we should never call if already calculated
   protected def determineType() : GenotypeType = {
+
     val alleles = getAlleles();
     if ( alleles.isEmpty ){  GenotypeType.UNAVAILABLE;}
     else
@@ -252,37 +248,37 @@ abstract class Genotype(private val sampleName: String, private val filters: Str
   /**
    * @return true if all observed alleles are ref; if any alleles are no-calls, this method will return false.
    */
-  def isHomRef() : Boolean = { getType() == GenotypeType.HOM_REF; }
+  def isHomRef() : Boolean = { gType == GenotypeType.HOM_REF; }
 
   /**
    * @return true if all observed alleles are alt; if any alleles are no-calls, this method will return false.
    */
-  def isHomVar(): Boolean = {  getType() == GenotypeType.HOM_VAR; }
+  def isHomVar(): Boolean = {  gType == GenotypeType.HOM_VAR; }
 
   /**
    * @return true if we're het (observed alleles differ); if the ploidy is less than 2 or if any alleles are no-calls, this method will return false.
    */
-  def isHet() : Boolean =  { getType() == GenotypeType.HET; }
+  def isHet() : Boolean =  { gType == GenotypeType.HET; }
 
   /**
    * @return true if this genotype is not actually a genotype but a "no call" (e.g. './.' in VCF); if any alleles are not no-calls (even if some are), this method will return false.
    */
-  def isNoCall() : Boolean = { return getType() == GenotypeType.NO_CALL; }
+  def isNoCall() : Boolean = { gType == GenotypeType.NO_CALL; }
 
   /**
    * @return true if this genotype is comprised of any alleles that are not no-calls (even if some are).
    */
-  def isCalled() : Boolean =  { getType() != GenotypeType.NO_CALL && getType() != GenotypeType.UNAVAILABLE; }
+  def isCalled() : Boolean =  { gType != GenotypeType.NO_CALL && gType != GenotypeType.UNAVAILABLE; }
 
   /**
    * @return true if this genotype is comprised of both calls and no-calls.
    */
-  def isMixed() : Boolean = { getType() == GenotypeType.MIXED; }
+  def isMixed() : Boolean = { gType == GenotypeType.MIXED; }
 
   /**
    * @return true if the type of this genotype is set.
    */
-  def isAvailable() : Boolean =  { getType() != GenotypeType.UNAVAILABLE; }
+  def isAvailable() : Boolean =  { gType != GenotypeType.UNAVAILABLE; }
 
   // ------------------------------------------------------------------------------
   //
