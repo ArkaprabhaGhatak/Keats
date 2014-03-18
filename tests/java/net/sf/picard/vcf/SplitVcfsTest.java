@@ -3,7 +3,7 @@ package net.sf.picard.vcf;
 import net.sf.picard.io.IoUtil;
 import net.sf.samtools.util.CloseableIterator;
 import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.broadinstitute.variant.variantcontext.VariantContext.Type;
+import org.broadinstitute.variant.variantcontext.VariantType;
 import org.broadinstitute.variant.variantcontext.writer.VariantContextWriter;
 import org.broadinstitute.variant.variantcontext.writer.VariantContextWriterFactory;
 import org.broadinstitute.variant.vcf.VCFFileReader;
@@ -50,8 +50,8 @@ public class SplitVcfsTest {
 		final CloseableIterator<VariantContext> iterator = reader.iterator();
 		while (iterator.hasNext()) {
 			final VariantContext inputContext = iterator.next();
-			if (inputContext.isIndel()) Assert.assertEquals(MergeVcfsTest.getContigPosition(inputContext), indelContigPositions.poll());
-			if (inputContext.isSNP()) Assert.assertEquals(MergeVcfsTest.getContigPosition(inputContext), snpContigPositions.poll());
+			if (inputContext.alleleContext().isIndel()) Assert.assertEquals(MergeVcfsTest.getContigPosition(inputContext), indelContigPositions.poll());
+			if (inputContext.alleleContext().isSNP()) Assert.assertEquals(MergeVcfsTest.getContigPosition(inputContext), snpContigPositions.poll());
 		}
 
 		// We should have polled everything off the indel (snp) queues
@@ -66,8 +66,8 @@ public class SplitVcfsTest {
 
 		int totalIn = 0;
 		int totalOut = 0;
-		final Map<Type, Integer> inputCounts = new HashMap<Type, Integer>();
-		final Map<Type, Integer> outputCounts = new HashMap<Type, Integer>();
+		final Map<VariantType, Integer> inputCounts = new HashMap<VariantType, Integer>();
+		final Map<VariantType, Integer> outputCounts = new HashMap<VariantType, Integer>();
 		final File INPUT = new File("/Volumes/Disko Segundo/splitvcfs/CEUTrio.HiSeq.WGS.b37.snps_and_indels.recalibrated.filtered.phased.CURRENT.vcf.gz");
 		final VCFFileReader reader = new VCFFileReader(INPUT);
 
@@ -83,16 +83,16 @@ public class SplitVcfsTest {
 			final VariantContext variantContext = iterator.next();
 			totalIn++;
 
-			final Integer inputCount = inputCounts.get(variantContext.getType());
-			if (inputCount == null) inputCounts.put(variantContext.getType(), 1);
-			else inputCounts.put(variantContext.getType(), inputCount + 1);
+			final Integer inputCount = inputCounts.get(variantContext.alleleContext().getType());
+			if (inputCount == null) inputCounts.put(variantContext.alleleContext().getType(), 1);
+			else inputCounts.put(variantContext.alleleContext().getType(), inputCount + 1);
 
 			if ((totalIn % SAMPLE_FREQUENCY) == 0) {
 				OUTPUT.add(variantContext);
 				totalOut++;
-				final Integer outputCount = outputCounts.get(variantContext.getType());
-				if (outputCount == null) outputCounts.put(variantContext.getType(), 1);
-				else outputCounts.put(variantContext.getType(), outputCount + 1);
+				final Integer outputCount = outputCounts.get(variantContext.alleleContext().getType());
+				if (outputCount == null) outputCounts.put(variantContext.alleleContext().getType(), 1);
+				else outputCounts.put(variantContext.alleleContext().getType(), outputCount + 1);
 			}
 		}
 

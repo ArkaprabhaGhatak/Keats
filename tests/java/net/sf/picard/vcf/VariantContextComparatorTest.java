@@ -23,10 +23,7 @@
  */
 package net.sf.picard.vcf;
 
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
-import org.broadinstitute.variant.variantcontext.VariantContextComparator;
+import org.broadinstitute.variant.variantcontext.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -41,7 +38,7 @@ public class VariantContextComparatorTest {
 		final Collection<Allele> alleles = new ArrayList<Allele>();
 		alleles.add(Allele.apply("AAAA", true));
 		alleles.add(Allele.apply("AAGG", false));
-		return new VariantContextBuilder(source, contig, start, start + 3, alleles).make();
+		return new VariantContextBuilder(source, contig, start, start + 3, new AlleleContext(alleles.toArray(new Allele[alleles.size()]))).make();
 	}
 
 	private static List<String> getOrderedContigList(final VariantContext... variantContexts) {

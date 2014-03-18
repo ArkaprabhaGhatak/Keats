@@ -90,29 +90,29 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         super(VariantContext.class);
     }
 
-    /**
-     * Creates a LazyParser for a LazyGenotypesContext to use to decode
-     * our genotypes only when necessary.  We do this instead of eagarly
-     * decoding the genotypes just to turn around and reencode in the frequent
-     * case where we don't actually want to manipulate the genotypes
-     */
-    class LazyVCFGenotypesParser implements LazyGenotypesContext.LazyParser {
-        final List<Allele> alleles;
-        final String contig;
-        final int start;
-
-        LazyVCFGenotypesParser(final List<Allele> alleles, final String contig, final int start) {
-            this.alleles = alleles;
-            this.contig = contig;
-            this.start = start;
-        }
-
-        @Override
-        public LazyGenotypesContext.LazyData parse(final Object data) {
-            //System.out.printf("Loading genotypes... %s:%d%n", contig, start);
-            return createGenotypeMap((String) data, alleles, contig, start);
-        }
-    }
+//    /**
+//     * Creates a LazyParser for a LazyGenotypesContext to use to decode
+//     * our genotypes only when necessary.  We do this instead of eagarly
+//     * decoding the genotypes just to turn around and reencode in the frequent
+//     * case where we don't actually want to manipulate the genotypes
+//     */
+//    class LazyVCFGenotypesParser implements LazyGenotypesContext.LazyParser {
+//        final List<Allele> alleles;
+//        final String contig;
+//        final int start;
+//
+//        LazyVCFGenotypesParser(final List<Allele> alleles, final String contig, final int start) {
+//            this.alleles = alleles;
+//            this.contig = contig;
+//            this.start = start;
+//        }
+//
+//        @Override
+//        public LazyGenotypesContext.LazyData parse(final Object data) {
+//            //System.out.printf("Loading genotypes... %s:%d%n", contig, start);
+//            return createGenotypeMap((String) data, alleles, contig, start);
+//        }
+//    }
 
     /**
      * parse the filter string, first checking to see if we already have parsed it in a previous attempt
@@ -288,9 +288,9 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         builder.log10PError(parseQual(parts[5]));
 
         final List<String> filters = parseFilters(getCachedString(parts[6]));
-        if ( filters != null ) builder.filters(new HashSet<String>(filters));
+        if ( filters != null ) builder.filters(scala.collection.JavaConversions.asScalaSet(new HashSet<String>(filters)));
         final Map<String, Object> attrs = parseInfo(parts[7]);
-        builder.attributes(attrs);
+        builder.attributesFromJava(scala.collection.JavaConversions.asScalaMap(attrs));
 
         if ( attrs.containsKey(VCFConstants.END_KEY) ) {
             // update stop with the end key if provided
@@ -305,19 +305,18 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
 
         // get our alleles, filters, and setup an attribute map
         final List<Allele> alleles = parseAlleles(ref, alts, lineNo);
-        builder.alleles(alleles);
+        builder.alleles(alleles.toArray(new Allele[alleles.size()]));
 
         // do we have genotyping data
         if (parts.length > NUM_STANDARD_FIELDS && includeGenotypes) {
-            final LazyGenotypesContext.LazyParser lazyParser = new LazyVCFGenotypesParser(alleles, chr, pos);
-            final int nGenotypes = header.getNGenotypeSamples();
-            LazyGenotypesContext lazy = new LazyGenotypesContext(lazyParser, parts[8], nGenotypes);
 
             // did we resort the sample names?  If so, we need to load the genotype data
-            if ( !header.samplesWereAlreadySorted() )
-                lazy.decode();
+           // if ( !header.samplesWereAlreadySorted() )
+             //   lazy.decode();
 
-            builder.genotypesNoValidation(lazy);
+            GenotypesContext gt = createGenotypeMap(parts[8], alleles, chr, pos);
+
+            builder.genotypes(gt);
         }
 
         VariantContext vc = null;
@@ -480,13 +479,13 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
     protected static Double parseQual(String qualString) {
         // if we're the VCF 4 missing char, return immediately
         if ( qualString.equals(VCFConstants.MISSING_VALUE_v4))
-            return VariantContext.NO_LOG10_PERROR;
+            return VariantContext.NO_LOG10_PERROR();
 
         Double val = Double.valueOf(qualString);
 
         // check to see if they encoded the missing qual score in VCF 3 style, with either the -1 or -1.0.  check for val < 0 to save some CPU cycles
         if ((val < 0) && (Math.abs(val - VCFConstants.MISSING_QUALITY_v3_DOUBLE) < VCFConstants.VCF_ENCODING_EPSILON))
-            return VariantContext.NO_LOG10_PERROR;
+            return VariantContext.NO_LOG10_PERROR();
 
         // scale and return the value
         return val / -10.0;
@@ -624,7 +623,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
      * @param alleles the list of alleles
      * @return a mapping of sample name to genotype object
      */
-    public LazyGenotypesContext.LazyData createGenotypeMap(final String str,
+    public GenotypesContext createGenotypeMap(final String str,
                                                               final List<Allele> alleles,
                                                               final String chr,
                                                               final int pos) {
@@ -725,7 +724,14 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
             }
         }
 
-        return new LazyGenotypesContext.LazyData(genotypes, header.getSampleNamesInOrder(), header.getSampleNameToOffset());
+
+        Genotype[] gArr = new Genotype[genotypes.size()];
+        gArr = genotypes.toArray(gArr);
+
+        String[] sArr = new String[header.getSampleNamesInOrder().size()];
+        sArr = header.getSampleNamesInOrder().toArray(sArr);
+
+        return GenotypesContext.create(gArr, scala.collection.JavaConversions.asScalaMap(header.getSampleNameToOffset()), sArr );
     }
 
     private final String[] INT_DECODE_ARRAY = new String[10000];

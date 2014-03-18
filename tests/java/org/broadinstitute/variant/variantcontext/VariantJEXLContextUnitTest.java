@@ -59,7 +59,7 @@ public class VariantJEXLContextUnitTest extends VariantBaseTest {
     @BeforeClass
     public void beforeClass() {
         try {
-            exp = new VariantContextUtils.JexlVCMatchExp("name", VariantContextUtils.engine.get().createExpression(expression));
+            exp = new VariantContextUtils.JexlVCMatchExp("name", VariantContextUtils.engine().get().createExpression(expression));
         } catch (Exception e) {
             Assert.fail("Unable to create expression" + e.getMessage());
         }
@@ -124,7 +124,7 @@ public class VariantJEXLContextUnitTest extends VariantBaseTest {
     private JEXLMap getVarContext() {
         List<Allele> alleles = Arrays.asList(Aref, T);
 
-        VariantContext vc = new VariantContextBuilder("test", "chr1", 10, 10, alleles).make();
+        VariantContext vc = new VariantContextBuilder("test", "chr1", 10, 10, new AlleleContext(alleles.toArray(new Allele[alleles.size()]))).make();
         return new JEXLMap(Arrays.asList(exp),vc);
     }
 }

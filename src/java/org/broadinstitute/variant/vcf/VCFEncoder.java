@@ -5,17 +5,12 @@ import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypeBuilder;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
-import org.broadinstitute.variant.variantcontext.LazyGenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.broadinstitute.variant.variantcontext.writer.IntGenotypeFieldAccessors;
 
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Functions specific to encoding VCF records.
@@ -78,16 +73,16 @@ public class VCFEncoder {
 		stringBuilder.append(context.getID()).append(VCFConstants.FIELD_SEPARATOR);
 
 		// REF
-		stringBuilder.append(context.getReference().getDisplayString()).append(VCFConstants.FIELD_SEPARATOR);
+		stringBuilder.append(context.alleleContext().getReference().getDisplayString()).append(VCFConstants.FIELD_SEPARATOR);
 
 		// ALT
-		if ( context.isVariant() ) {
-			Allele altAllele = context.getAlternateAllele(0);
+		if ( context.alleleContext().isVariant() ) {
+			Allele altAllele = context.alleleContext().getAlternateAllele(0);
 			String alt = altAllele.getDisplayString();
 			stringBuilder.append(alt);
 
-			for (int i = 1; i < context.getAlternateAlleles().size(); i++) {
-				altAllele = context.getAlternateAllele(i);
+			for (int i = 1; i < context.alleleContext().getAlternateAlleles().length; i++) {
+				altAllele = context.alleleContext().getAlternateAllele(i);
 				alt = altAllele.getDisplayString();
 				stringBuilder.append(",");
 				stringBuilder.append(alt);
@@ -108,7 +103,7 @@ public class VCFEncoder {
 
 		// INFO
 		final Map<String, String> infoFields = new TreeMap<String, String>();
-		for (final Map.Entry<String, Object> field : context.getAttributes().entrySet() ) {
+		for (final Map.Entry<String, Object> field : scala.collection.JavaConversions.asJavaMap(context.getAttributes()).entrySet() ) {
 			if ( ! this.header.hasInfoLine(field.getKey())) fieldIsMissingFromHeaderError(context, field.getKey(), "INFO");
 
 			final String outputValue = formatVCFField(field.getValue());
@@ -117,12 +112,13 @@ public class VCFEncoder {
 		writeInfoString(infoFields, stringBuilder);
 
 		// FORMAT
-		final GenotypesContext gc = context.getGenotypes();
-		if (gc.isLazyWithData() && ((LazyGenotypesContext) gc).getUnparsedGenotypeData() instanceof String) {
+		final GenotypesContext gc = context.genotypeContext();
+		if (gc.isLazyWithData() ) {
 			stringBuilder.append(VCFConstants.FIELD_SEPARATOR);
-			stringBuilder.append(((LazyGenotypesContext) gc).getUnparsedGenotypeData().toString());
-		} else {
-			final List<String> genotypeAttributeKeys = context.calcVCFGenotypeKeys(this.header);
+			stringBuilder.append(gc.getUnparsedGenotypeData().toString());
+		} else
+        {
+			final List<String> genotypeAttributeKeys = Arrays.asList(context.calcVCFGenotypeKeys(this.header));
 			if ( ! genotypeAttributeKeys.isEmpty()) {
 				for (final String format : genotypeAttributeKeys)
 					if ( ! this.header.hasFormatLine(format))
@@ -151,11 +147,11 @@ public class VCFEncoder {
 
 	private String getFilterString(final VariantContext vc) {
 		if (vc.isFiltered()) {
-			for (final String filter : vc.getFilters()) {
+			for (final String filter : scala.collection.JavaConversions.asJavaSet(vc.getFilters())) {
 				if ( ! this.header.hasFilterLine(filter)) fieldIsMissingFromHeaderError(vc, filter, "FILTER");
 			}
 
-			return ParsingUtils.join(";", ParsingUtils.sortList(vc.getFilters()));
+			return ParsingUtils.join(";", ParsingUtils.sortList(scala.collection.JavaConversions.asJavaSet(vc.getFilters())));
 		}
 		else if (vc.filtersWereApplied()) return VCFConstants.PASSES_FILTERS_v4;
 		else return VCFConstants.UNFILTERED;
@@ -253,7 +249,7 @@ public class VCFEncoder {
 		for (final String sample : this.header.getGenotypeSamples()) {
 			builder.append(VCFConstants.FIELD_SEPARATOR);
 
-			Genotype g = vc.getGenotype(sample);
+			Genotype g = vc.genotypeContext().apply(sample);
 			if (g == null) g = GenotypeBuilder.createMissing(sample, ploidy);
 
 			final List<String> attrs = new ArrayList<String>(genotypeFormatKeys.size());
@@ -361,10 +357,10 @@ public class VCFEncoder {
 	}
 
 	private Map<Allele, String> buildAlleleStrings(final VariantContext vc) {
-		final Map<Allele, String> alleleMap = new HashMap<Allele, String>(vc.getAlleles().size()+1);
+		final Map<Allele, String> alleleMap = new HashMap<Allele, String>(vc.alleleContext().getAlleles().length +1);
 		alleleMap.put(Allele.NO_CALL(), VCFConstants.EMPTY_ALLELE); // convenience for lookup
 
-		final List<Allele> alleles = vc.getAlleles();
+		final List<Allele> alleles = Arrays.asList(vc.alleleContext().getAlleles());
 		for ( int i = 0; i < alleles.size(); i++ ) {
 			alleleMap.put(alleles.get(i), String.valueOf(i));
 		}

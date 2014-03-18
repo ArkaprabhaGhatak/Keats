@@ -64,16 +64,16 @@ class VariantJEXLContext implements JexlContext {
         x.put("vc",   new AttributeGetter() { public Object get(VariantContext vc) { return vc; }});
         x.put("CHROM",   new AttributeGetter() { public Object get(VariantContext vc) { return vc.getChr(); }});
         x.put("POS",     new AttributeGetter() { public Object get(VariantContext vc) { return vc.getStart(); }});
-        x.put("TYPE",    new AttributeGetter() { public Object get(VariantContext vc) { return vc.getType().toString(); }});
+        x.put("TYPE",    new AttributeGetter() { public Object get(VariantContext vc) { return vc.alleleContext().getType().toString(); }});
         x.put("QUAL",    new AttributeGetter() { public Object get(VariantContext vc) { return -10 * vc.getLog10PError(); }});
-        x.put("ALLELES", new AttributeGetter() { public Object get(VariantContext vc) { return vc.getAlleles(); }});
-        x.put("N_ALLELES", new AttributeGetter() { public Object get(VariantContext vc) { return vc.getNAlleles(); }});
+        x.put("ALLELES", new AttributeGetter() { public Object get(VariantContext vc) { return vc.alleleContext().getAlleles(); }});
+        x.put("N_ALLELES", new AttributeGetter() { public Object get(VariantContext vc) { return vc.alleleContext().getNAlleles(); }});
         x.put("FILTER",    new AttributeGetter() { public Object get(VariantContext vc) { return vc.isFiltered() ? "1" : "0"; }});
 
 //        x.put("GT",        new AttributeGetter() { public Object get(VariantContext vc) { return g.getGenotypeString(); }});
-        x.put("homRefCount",  new AttributeGetter() { public Object get(VariantContext vc) { return vc.getHomRefCount(); }});
-        x.put("hetCount",     new AttributeGetter() { public Object get(VariantContext vc) { return vc.getHetCount(); }});
-        x.put("homVarCount",  new AttributeGetter() { public Object get(VariantContext vc) { return vc.getHomVarCount(); }});
+        x.put("homRefCount",  new AttributeGetter() { public Object get(VariantContext vc) { return vc.genotypeContext().getHomRefCount(); }});
+        x.put("hetCount",     new AttributeGetter() { public Object get(VariantContext vc) { return vc.genotypeContext().getHetCount(); }});
+        x.put("homVarCount",  new AttributeGetter() { public Object get(VariantContext vc) { return vc.genotypeContext().getHomVarCount(); }});
     }
 
     public VariantJEXLContext(VariantContext vc) {

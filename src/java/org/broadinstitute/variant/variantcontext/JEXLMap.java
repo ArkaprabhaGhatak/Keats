@@ -6,10 +6,7 @@ import org.broadinstitute.variant.utils.GeneralUtils;
 import org.broadinstitute.variant.variantcontext.VariantContextUtils.JexlVCMatchExp;
 import org.broadinstitute.variant.vcf.VCFConstants;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * this is an implementation of a Map of JexlVCMatchExp to true or false values.  It lazy initializes each value
@@ -68,19 +65,19 @@ class JEXLMap implements Map<JexlVCMatchExp, Boolean> {
                 // create a mapping of what we know about the variant context, its Chromosome, positions, etc.
                 infoMap.put("CHROM", vc.getChr());
                 infoMap.put("POS", vc.getStart());
-                infoMap.put("TYPE", vc.getType().toString());
+                infoMap.put("TYPE", vc.alleleContext().getType().toString());
                 infoMap.put("QUAL", String.valueOf(vc.getPhredScaledQual()));
 
                 // add alleles
-                infoMap.put("ALLELES", GeneralUtils.join(";", vc.getAlleles()));
-                infoMap.put("N_ALLELES", String.valueOf(vc.getNAlleles()));
+                infoMap.put("ALLELES", GeneralUtils.join(";", Arrays.asList(vc.alleleContext().getAlleles())));
+                infoMap.put("N_ALLELES", String.valueOf(vc.alleleContext().getNAlleles()));
 
                 // add attributes
-                addAttributesToMap(infoMap, vc.getAttributes());
+                addAttributesToMap(infoMap, scala.collection.JavaConversions.asJavaMap(vc.getAttributes()));
 
                 // add filter fields
                 infoMap.put("FILTER", vc.isFiltered() ? "1" : "0");
-                for ( Object filterCode : vc.getFilters() ) {
+                for ( Object filterCode : scala.collection.JavaConversions.asJavaSet(vc.getFilters()) ) {
                     infoMap.put(String.valueOf(filterCode), "1");
                 }
 
@@ -171,7 +168,7 @@ class JEXLMap implements Map<JexlVCMatchExp, Boolean> {
         // if the context is null, we need to create it to evaluate the JEXL expression
         if (this.jContext == null) createContext();
         try {
-            final Boolean value = (Boolean) exp.exp.evaluate(jContext);
+            final Boolean value = (Boolean) exp.exp().evaluate(jContext);
             // treat errors as no match
             jexl.put(exp, value == null ? false : value);
         } catch (Exception e) {
@@ -180,7 +177,7 @@ class JEXLMap implements Map<JexlVCMatchExp, Boolean> {
             if (e.getMessage().contains("undefined variable"))
                 jexl.put(exp,false);
             else
-                throw new IllegalArgumentException(String.format("Invalid JEXL expression detected for %s with message %s", exp.name, e.getMessage()));
+                throw new IllegalArgumentException(String.format("Invalid JEXL expression detected for %s with message %s", exp.name(), e.getMessage()));
         }
     }
 

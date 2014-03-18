@@ -88,10 +88,10 @@ public class SplitVcfs extends CommandLineProgram {
 		final CloseableIterator<VariantContext> iterator = fileReader.iterator();
 		while (iterator.hasNext()) {
 			final VariantContext context = iterator.next();
-			if (context.isIndel()) indelWriter.add(context);
-			else if (context.isSNP()) snpWriter.add(context);
+			if (context.alleleContext().isIndel()) indelWriter.add(context);
+			else if (context.alleleContext().isSNP()) snpWriter.add(context);
 			else {
-                if (STRICT) throw new IllegalStateException("Found a record with type " + context.getType().name());
+                if (STRICT) throw new IllegalStateException("Found a record with type " + context.alleleContext().getType().name());
                 else incorrectVariantCount++;
             }
 

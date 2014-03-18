@@ -98,8 +98,8 @@ public class MergeVcfsTest {
 		final CloseableIterator<VariantContext> iterator = outputReader.iterator();
 		while (iterator.hasNext()) {
 			final VariantContext outputContext = iterator.next();
-			if (outputContext.isIndel()) Assert.assertEquals(getContigPosition(outputContext), indelContigPositions.poll());
-			if (outputContext.isSNP()) Assert.assertEquals(getContigPosition(outputContext), snpContigPositions.poll());
+			if (outputContext.alleleContext().isIndel()) Assert.assertEquals(getContigPosition(outputContext), indelContigPositions.poll());
+			if (outputContext.alleleContext().isSNP()) Assert.assertEquals(getContigPosition(outputContext), snpContigPositions.poll());
 			if (last != null) Assert.assertTrue(outputComparator.compare(last, outputContext) < 0);
 			last = outputContext;
 		}

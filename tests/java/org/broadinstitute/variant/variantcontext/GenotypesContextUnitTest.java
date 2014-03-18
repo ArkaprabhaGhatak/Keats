@@ -74,7 +74,7 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
     private ContextMaker baseMaker = new ContextMaker() {
         @Override
         public GenotypesContext make(final List<Genotype> initialSamples) {
-            return GenotypesContext.copy(initialSamples);
+            return GenotypesContext.copy(scala.collection.JavaConversions.asScalaBuffer(initialSamples));
         }
 
         @Override
@@ -83,27 +83,9 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         }
     };
 
-    private final class lazyMaker implements LazyGenotypesContext.LazyParser, ContextMaker {
-        @Override
-        public LazyGenotypesContext.LazyData parse(final Object data) {
-            GenotypesContext gc = GenotypesContext.copy((List<Genotype>)data);
-            gc.ensureSampleNameMap();
-            gc.ensureSampleOrdering();
-            return new LazyGenotypesContext.LazyData(gc.notToBeDirectlyAccessedGenotypes, gc.sampleNamesInOrder, gc.sampleNameToOffset);
-        }
 
-        @Override
-        public GenotypesContext make(final List<Genotype> initialSamples) {
-            return new LazyGenotypesContext(this, initialSamples, initialSamples.size());
-        }
-
-        @Override
-        public String toString() {
-            return "LazyGenotypesContext";
-        }
-    }
-
-    private Collection<ContextMaker> allMakers = Arrays.asList(baseMaker, new lazyMaker());
+    //private Collection<ContextMaker> allMakers = Arrays.asList(baseMaker, new lazyMaker());
+    private Collection<ContextMaker> allMakers = Arrays.asList(baseMaker);
 
     private class GenotypesContextProvider {
         String name;
@@ -158,35 +140,35 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
 
         // get(index) is doing the right thing
         for ( int i = 0; i < expectedSamples.size(); i++ ) {
-            Assert.assertEquals(gc.get(i), expectedSamples.get(i));
+            Assert.assertEquals(gc.apply(i), expectedSamples.get(i));
         }
         Assert.assertFalse(gc.containsSample(MISSING.getSampleName()));
 
         // we can fetch samples by name
-        final Set<String> genotypeNames = VariantContextUtils.genotypeNames(expectedSamples);
+        final Set<String> genotypeNames = scala.collection.JavaConversions.asJavaSet(VariantContextUtils.genotypeNames(scala.collection.JavaConversions.asScalaBuffer(expectedSamples)));
         for ( final String name : genotypeNames ) {
             Assert.assertTrue(gc.containsSample(name));
         }
         Assert.assertFalse(gc.containsSample(MISSING.getSampleName()));
 
         // all of the iterators are working
-        testIterable(gc.iterateInSampleNameOrder(), genotypeNames);
-        testIterable(gc, genotypeNames);
-        testIterable(gc.iterateInSampleNameOrder(genotypeNames), genotypeNames);
+        testIterable(scala.collection.JavaConversions.asJavaIterable(gc.iterateInSampleNameOrder()), genotypeNames);
+        testIterable(scala.collection.JavaConversions.asJavaIterable(gc), genotypeNames);
+        testIterable(scala.collection.JavaConversions.asJavaIterable(gc.iterateInSampleNameOrder(scala.collection.JavaConversions.asScalaSet(genotypeNames))), genotypeNames);
         if ( ! genotypeNames.isEmpty() ) {
             Set<String> first = Collections.singleton(genotypeNames.iterator().next());
-            testIterable(gc.iterateInSampleNameOrder(first), first);
+            testIterable(scala.collection.JavaConversions.asJavaIterable(gc.iterateInSampleNameOrder(scala.collection.JavaConversions.asScalaSet(first))), first);
         }
 
         // misc. utils are working as expected
-        assertEqualsSet(gc.getSampleNames(), genotypeNames, "gc sample names vs. expected sample names");
-        Assert.assertTrue(ParsingUtils.isSorted(gc.getSampleNamesOrderedByName()));
-        Assert.assertTrue(ParsingUtils.isSorted(gc.iterateInSampleNameOrder()));
-        Assert.assertTrue(gc.containsSamples(genotypeNames));
+        assertEqualsSet(scala.collection.JavaConversions.asJavaSet(gc.getSampleNames()), genotypeNames, "gc sample names vs. expected sample names");
+        Assert.assertTrue(ParsingUtils.isSorted(Arrays.asList(gc.getSampleNamesOrderedByName())));
+        Assert.assertTrue(ParsingUtils.isSorted(scala.collection.JavaConversions.asJavaIterable(gc.iterateInSampleNameOrder())));
+        Assert.assertTrue(gc.containsSamples(scala.collection.JavaConversions.asScalaSet(genotypeNames)));
 
         final Set<String> withMissing = new HashSet<String>(Arrays.asList(MISSING.getSampleName()));
         withMissing.addAll(genotypeNames);
-        Assert.assertFalse(gc.containsSamples(withMissing));
+        Assert.assertFalse(gc.containsSamples(scala.collection.JavaConversions.asScalaSet(withMissing)));
     }
 
     @Test(enabled = true, dataProvider = "GenotypesContextProvider")
@@ -201,7 +183,7 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
     public void testImmutableCall1(GenotypesContextProvider cfg) {
         GenotypesContext gc = cfg.makeContext();
         gc.immutable();
-        gc.add(MISSING);
+        gc.$plus$eq(MISSING);
     }
 
     @Test(enabled = true, dataProvider = "GenotypesContextProvider")
@@ -229,16 +211,16 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         Genotype add2 = GenotypeBuilder.apply("add2", new Allele[]{Aref, Aref});
 
         GenotypesContext gc = cfg.makeContext();
-        gc.add(add1);
+        gc.$plus$eq(add1);
         testGenotypesContextContainsExpectedSamples(gc, with(cfg.initialSamples, add1));
 
         gc = cfg.makeContext();
-        gc.add(add1);
-        gc.add(add2);
+        gc.$plus$eq(add1);
+        gc.$plus$eq(add2);
         testGenotypesContextContainsExpectedSamples(gc, with(cfg.initialSamples, add1, add2));
 
         gc = cfg.makeContext();
-        gc.addAll(Arrays.asList(add1, add2));
+        gc.$plus$plus$eq(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(add1, add2)));
         testGenotypesContextContainsExpectedSamples(gc, with(cfg.initialSamples, add1, add2));
     }
 
@@ -249,34 +231,34 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
 
         GenotypesContext gc = cfg.makeContext();
         if (gc.size() > 1) {
-            Genotype rm = gc.get(0);
-            gc.remove(rm);
+            Genotype rm = gc.apply(0);
+            gc.$minus$eq(rm);
             testGenotypesContextContainsExpectedSamples(gc, without(cfg.initialSamples, rm));
         }
 
         gc = cfg.makeContext();
-        gc.remove(rm1);
+        gc.$minus$eq(rm1);
         testGenotypesContextContainsExpectedSamples(gc, without(cfg.initialSamples, rm1));
 
         gc = cfg.makeContext();
-        gc.remove(rm1);
-        gc.remove(rm2);
+        gc.$minus$eq(rm1);
+        gc.$minus$eq(rm2);
         testGenotypesContextContainsExpectedSamples(gc, without(cfg.initialSamples, rm1, rm2));
 
         gc = cfg.makeContext();
-        gc.removeAll(Arrays.asList(rm1, rm2));
+        gc.$minus$minus$eq(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(rm1, rm2)));
         testGenotypesContextContainsExpectedSamples(gc, without(cfg.initialSamples, rm1, rm2));
 
         gc = cfg.makeContext();
         HashSet<Genotype> expected = new HashSet<Genotype>();
         if ( gc.contains(rm1) ) expected.add(rm1);
         if ( gc.contains(rm2) ) expected.add(rm2);
-        gc.retainAll(Arrays.asList(rm1, rm2));
+        gc.retainAll(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(rm1, rm2)));
 
         // ensure that the two lists are the same
-        assertEqualsSet(new HashSet<Genotype>(gc.getGenotypes()), expected, "gc genotypes vs. expected");
+        assertEqualsSet(new HashSet<Genotype>(Arrays.asList(gc.getGenotypes())), expected, "gc genotypes vs. expected");
         // because the list order can change, we use the gc's list itself
-        testGenotypesContextContainsExpectedSamples(gc, gc.getGenotypes());
+        testGenotypesContextContainsExpectedSamples(gc, Arrays.asList(gc.getGenotypes()));
     }
 
     @Test(enabled = true, dataProvider = "GenotypesContextProvider")
@@ -285,7 +267,8 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         int n = cfg.makeContext().size();
         for ( int i = 0; i < n; i++ ) {
             GenotypesContext gc = cfg.makeContext();
-            Genotype setted = gc.set(i, set);
+            Genotype setted = gc.apply(i);
+            gc.update(i, set);
             Assert.assertNotNull(setted);
             ArrayList<Genotype> l = new ArrayList<Genotype>(cfg.initialSamples);
             l.set(i, set);
@@ -298,12 +281,12 @@ public class GenotypesContextUnitTest extends VariantBaseTest {
         int n = cfg.makeContext().size();
         for ( int i = 0; i < n; i++ ) {
             GenotypesContext gc = cfg.makeContext();
-            Genotype toReplace = gc.get(i);
+            Genotype toReplace = gc.apply(i);
             Genotype replacement = GenotypeBuilder.apply(toReplace.getSampleName(), new Allele[]{Aref, Aref});
             gc.replace(replacement);
             ArrayList<Genotype> l = new ArrayList<Genotype>(cfg.initialSamples);
             l.set(i, replacement);
-            Assert.assertEquals(replacement, gc.get(i));
+            Assert.assertEquals(replacement, gc.apply(i));
             testGenotypesContextContainsExpectedSamples(gc, l);
         }
     }

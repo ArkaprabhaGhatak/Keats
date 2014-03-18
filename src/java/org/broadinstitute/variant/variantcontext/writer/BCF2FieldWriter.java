@@ -35,10 +35,7 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * See #BCFWriter for documentation on this classes role in encoding BCF2 files
@@ -165,7 +162,7 @@ public abstract class BCF2FieldWriter {
         private final int computeMaxSizeOfGenotypeFieldFromValues(final VariantContext vc) {
             int size = -1;
 
-            for ( final Genotype g : vc.getGenotypes() ) {
+            for ( final Genotype g : vc.genotypeContext().getGenotypes() ) {
                 size = Math.max(size, numElements(vc, g));
             }
 
@@ -188,8 +185,8 @@ public abstract class BCF2FieldWriter {
         @Override
         public void start(final BCF2Encoder encoder, final VariantContext vc) throws IOException {
             // the only value that is dynamic are integers
-            final List<Integer> values = new ArrayList<Integer>(vc.getNSamples());
-            for ( final Genotype g : vc.getGenotypes() ) {
+            final List<Integer> values = new ArrayList<Integer>(vc.genotypeContext().size());
+            for ( final Genotype g : vc.genotypeContext().getGenotypes() ) {
                 for ( final Object i : BCF2Utils.toList(g.getExtendedAttribute(getField(), null)) ) {
                     if ( i != null ) values.add((Integer)i); // we know they are all integers
                 }
@@ -217,7 +214,7 @@ public abstract class BCF2FieldWriter {
             // TODO this piece of code consumes like 10% of the runtime alone because fo the vc.getGenotypes() iteration
             // TODO
             encodingType = BCF2Type.INT8;
-            for ( final Genotype g : vc.getGenotypes() ) {
+            for ( final Genotype g : vc.genotypeContext().getGenotypes() ) {
                 final int[] pls = ige.getValues(g);
                 final BCF2Type plsType = getFieldEncoder().getType(pls);
                 encodingType = BCF2Utils.maxIntegerType(encodingType, plsType);
@@ -265,10 +262,10 @@ public abstract class BCF2FieldWriter {
 
         @Override
         public void start(final BCF2Encoder encoder, final VariantContext vc) throws IOException {
-            if ( vc.getNAlleles() > BCF2Utils.MAX_ALLELES_IN_GENOTYPES )
+            if ( vc.alleleContext().getNAlleles() > BCF2Utils.MAX_ALLELES_IN_GENOTYPES )
                 throw new IllegalStateException("Current BCF2 encoder cannot handle sites " +
                         "with > " + BCF2Utils.MAX_ALLELES_IN_GENOTYPES + " alleles, but you have "
-                        + vc.getNAlleles() + " at " + vc.getChr() + ":" + vc.getStart());
+                        + vc.alleleContext().getNAlleles() + " at " + vc.getChr() + ":" + vc.getStart());
 
             encodingType = BCF2Type.INT8;
             buildAlleleMap(vc);
@@ -319,14 +316,14 @@ public abstract class BCF2FieldWriter {
 
         private final void buildAlleleMap(final VariantContext vc) {
             // these are fast path options to determine the offsets for
-            final int nAlleles = vc.getNAlleles();
-            ref = vc.getReference();
-            alt1 = nAlleles > 1 ? vc.getAlternateAllele(0) : null;
+            final int nAlleles = vc.alleleContext().getNAlleles();
+            ref = vc.alleleContext().getReference();
+            alt1 = nAlleles > 1 ? vc.alleleContext().getAlternateAllele(0) : null;
 
             if ( nAlleles > 2 ) {
                 // for multi-allelics we need to clear the map, and add additional looks
                 alleleMapForTriPlus.clear();
-                final List<Allele> alleles = vc.getAlleles();
+                final List<Allele> alleles = Arrays.asList(vc.alleleContext().getAlleles());
                 for ( int i = 2; i < alleles.size(); i++ ) {
                     alleleMapForTriPlus.put(alleles.get(i), i);
                 }

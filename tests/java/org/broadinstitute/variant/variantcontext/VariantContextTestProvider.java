@@ -39,6 +39,7 @@ import org.broadinstitute.variant.variantcontext.writer.VariantContextWriter;
 import org.broadinstitute.variant.vcf.*;
 import org.testng.Assert;
 
+
 import java.io.*;
 import java.util.*;
 
@@ -123,7 +124,7 @@ public class VariantContextTestProvider {
             final Set<String> samples = new HashSet<String>();
             for ( final VariantContext vc : vcs )
                 if ( vc.hasGenotypes() )
-                    samples.addAll(vc.getSampleNames());
+                    samples.addAll(scala.collection.JavaConversions.asJavaSet(vc.genotypeContext().getSampleNames()));
             this.header = samples.isEmpty() ? header : new VCFHeader(header.getMetaDataInSortedOrder(), samples);
             this.vcs = vcs;
         }
@@ -139,11 +140,11 @@ public class VariantContextTestProvider {
             final VariantContextBuilder builder = new VariantContextBuilder(vc);
             builder.noGenotypes();
             b.append(builder.make().toString());
-            if ( vc.getNSamples() < 5 ) {
-                for ( final Genotype g : vc.getGenotypes() )
+            if ( vc.genotypeContext().size() < 5 ) {
+                for ( final Genotype g : vc.genotypeContext().getGenotypes() )
                     b.append(g.toString());
             } else {
-                b.append(" nGenotypes = ").append(vc.getNSamples());
+                b.append(" nGenotypes = ").append(vc.genotypeContext().size());
             }
 
             if ( vcs.size() > 1 ) b.append(" ----- with another ").append(vcs.size() - 1).append(" VariantContext records");
@@ -234,25 +235,25 @@ public class VariantContextTestProvider {
         VariantContextBuilder rootBuilder = new VariantContextBuilder();
         rootBuilder.source("test");
         rootBuilder.loc("1", 10, 10);
-        rootBuilder.alleles("A", "C");
+        rootBuilder.alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "C")));
         rootBuilder.unfiltered();
         ROOT = rootBuilder.make();
 
         add(builder());
-        add(builder().alleles("A"));
-        add(builder().alleles("A", "C", "T"));
-        add(builder().alleles("A", "AC"));
-        add(builder().alleles("A", "ACAGT"));
-        add(builder().loc("1", 10, 11).alleles("AC", "A"));
-        add(builder().loc("1", 10, 13).alleles("ACGT", "A"));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A"))));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "C", "T"))));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "AC"))));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "ACAGT"))));
+        add(builder().loc("1", 10, 11).alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("AC", "A"))));
+        add(builder().loc("1", 10, 13).alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("ACGT", "A"))));
 
         // make sure filters work
         add(builder().unfiltered());
         add(builder().passFilters());
-        add(builder().filters("FILTER1"));
-        add(builder().filters("FILTER1", "FILTER2"));
+        add(builder().filters(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("FILTER1"))));
+        add(builder().filters(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("FILTER1", "FILTER2"))));
 
-        add(builder().log10PError(VariantContext.NO_LOG10_PERROR));
+        add(builder().log10PError(VariantContext.NO_LOG10_PERROR()));
         add(builder().log10PError(-1));
         add(builder().log10PError(-1.234e6));
 
@@ -309,17 +310,17 @@ public class VariantContextTestProvider {
 
     private static void addSymbolicAlleleTests() {
         // two tests to ensure that the end is computed correctly when there's (and not) an END field present
-        add(builder().alleles("N", "<VQSR>").start(10).stop(11).attribute("END", 11));
-        add(builder().alleles("N", "<VQSR>").start(10).stop(10));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("N", "<VQSR>"))).start(10).stop(11).attribute("END", 11));
+        add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("N", "<VQSR>"))).start(10).stop(10));
     }
 
     private static void addGenotypesToTestData() {
         final ArrayList<VariantContext> sites = new ArrayList<VariantContext>();
 
-        sites.add(builder().alleles("A").make());
-        sites.add(builder().alleles("A", "C", "T").make());
-        sites.add(builder().alleles("A", "AC").make());
-        sites.add(builder().alleles("A", "ACAGT").make());
+        sites.add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A"))).make());
+        sites.add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "C", "T"))).make());
+        sites.add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "AC"))).make());
+        sites.add(builder().alleles(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList("A", "ACAGT"))).make());
 
         for ( VariantContext site : sites ) {
             addGenotypes(site);
@@ -335,21 +336,21 @@ public class VariantContextTestProvider {
         final VariantContextBuilder builder = new VariantContextBuilder(site);
 
         // add a single context
-        builder.genotypes(genotypes[0]);
+        builder.genotypes(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(genotypes[0])));
         add(builder);
 
         if ( genotypes.length > 1 ) {
             // add all
-            add(builder.genotypes(Arrays.asList(genotypes)));
+            add(builder.genotypes(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(genotypes))));
 
             // add all with the last replicated 10x and 100x times
             for ( int nCopiesOfLast : Arrays.asList(10, 100, 1000) ) {
                 final GenotypesContext gc = new GenotypesContext();
                 final Genotype last = genotypes[genotypes.length-1];
                 for ( int i = 0; i < genotypes.length - 1; i++ )
-                    gc.add(genotypes[i]);
+                    gc.$plus$eq(genotypes[i]);
                 for ( int i = 0; i < nCopiesOfLast; i++ )
-                    gc.add(new GenotypeBuilder(last).name("copy" + i).make());
+                    gc.$plus$eq(new GenotypeBuilder(last).name("copy" + i).make());
                 add(builder.genotypes(gc));
             }
         }
@@ -357,8 +358,8 @@ public class VariantContextTestProvider {
 
     private static void addGenotypes( final VariantContext site) {
         // test ref/ref
-        final Allele ref = site.getReference();
-        final Allele alt1 = site.getNAlleles() > 1 ? site.getAlternateAllele(0) : null;
+        final Allele ref = site.alleleContext().getReference();
+        final Allele alt1 = site.alleleContext().getNAlleles() > 1 ? site.alleleContext().getAlternateAllele(0) : null;
         final Genotype homRef = GenotypeBuilder.apply("homRef", new Allele[]{ref, ref});
         addGenotypeTests(site, homRef);
 
@@ -442,7 +443,7 @@ public class VariantContextTestProvider {
         }
 
         if ( ENABLE_PL_TESTS ) {
-            if ( site.getNAlleles() == 2 ) {
+            if ( site.alleleContext().getNAlleles() == 2 ) {
                 // testing PLs
                 addGenotypeTests(site,
                         GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{0, -1, -2}),
@@ -460,7 +461,7 @@ public class VariantContextTestProvider {
                         GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{-1, 0, -2}),
                         GenotypeBuilder.apply("g2", new Allele[]{ref, ref}));
             }
-            else if ( site.getNAlleles() == 3 ) {
+            else if ( site.alleleContext().getNAlleles() == 3 ) {
                 // testing PLs
                 addGenotypeTests(site,
                         GenotypeBuilder.apply("g1", new Allele[]{ref, ref}, new double[]{0, -1, -2, -3, -4, -5}),
@@ -570,10 +571,10 @@ public class VariantContextTestProvider {
                             Arrays.asList("A", "C", "G", "T"));
 
             for ( final List<String> alleles : alleleCombinations ) {
-                final VariantContextBuilder vcb = builder().alleles(alleles);
+                final VariantContextBuilder vcb = builder().alleles(alleles.toArray(new String[alleles.size()]));
                 final VariantContext site = vcb.make();
-                final int nAlleles = site.getNAlleles();
-                final Allele ref = site.getReference();
+                final int nAlleles = site.alleleContext().getNAlleles();
+                final Allele ref = site.alleleContext().getReference();
 
                 // base genotype is ref/.../ref up to ploidy
                 final List<Allele> baseGenotype = new ArrayList<Allele>(ploidy);
@@ -597,7 +598,7 @@ public class VariantContextTestProvider {
                 gb.alleles(aArr);
                 gb.PL(pl);
                 gb.attribute("ADA", nAlleles == 2 ? ada.get(0) : ada);
-                vcb.genotypes(gb.make());
+                vcb.genotypes(scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(gb.make())));
 
                 add(vcb);
             }
@@ -621,9 +622,10 @@ public class VariantContextTestProvider {
         final int nSamples = data.header.getNGenotypeSamples();
         if ( nSamples > 2 ) {
             for ( final VariantContext vc : data.vcs )
-                if ( vc.isSymbolic() )
+            {
+                if ( vc.alleleContext().isSymbolic() ){
                     // cannot handle symbolic alleles because they may be weird non-call VCFs
-                    return;
+            }        return;}
 
             final File tmpFile = File.createTempFile("testReaderWriter", tester.getExtension());
             tmpFile.deleteOnExit();
@@ -648,10 +650,10 @@ public class VariantContextTestProvider {
             for ( final VariantContext readVC : actual ) {
                 if ( readVC == null ) continue; // sometimes we read null records...
                 final VariantContext expected = data.vcs.get(i++);
-                for ( final Genotype g : readVC.getGenotypes() ) {
+                for ( final Genotype g : readVC.genotypeContext().getGenotypes() ) {
                     Assert.assertTrue(allSamples.contains(g.getSampleName()));
                     if ( samplesInVCF.contains(g.getSampleName()) ) {
-                        assertEquals(g, expected.getGenotype(g.getSampleName()));
+                        assertEquals(g, expected.genotypeContext().apply(g.getSampleName()));
                     } else {
                         // missing
                         Assert.assertTrue(g.isNoCall());
@@ -816,21 +818,21 @@ public class VariantContextTestProvider {
         Assert.assertEquals(actual.getStart(), expected.getStart(), "start");
         Assert.assertEquals(actual.getEnd(), expected.getEnd(), "end");
         Assert.assertEquals(actual.getID(), expected.getID(), "id");
-        Assert.assertEquals(actual.getAlleles(), expected.getAlleles(), "alleles for " + expected + " vs " + actual);
+        Assert.assertEquals(actual.alleleContext().getAlleles(), expected.alleleContext().getAlleles(), "alleles for " + expected + " vs " + actual);
 
-        assertAttributesEquals(actual.getAttributes(), expected.getAttributes());
+        assertAttributesEquals(scala.collection.JavaConversions.asJavaMap(actual.getAttributes()), scala.collection.JavaConversions.asJavaMap(expected.getAttributes()));
         Assert.assertEquals(actual.filtersWereApplied(), expected.filtersWereApplied(), "filtersWereApplied");
         Assert.assertEquals(actual.isFiltered(), expected.isFiltered(), "isFiltered");
-        VariantBaseTest.assertEqualsSet(actual.getFilters(), expected.getFilters(), "filters");
+        VariantBaseTest.assertEqualsSet(scala.collection.JavaConversions.asJavaSet(actual.getFilters()), scala.collection.JavaConversions.asJavaSet(expected.getFilters()), "filters");
         VariantBaseTest.assertEqualsDoubleSmart(actual.getPhredScaledQual(), expected.getPhredScaledQual());
 
         Assert.assertEquals(actual.hasGenotypes(), expected.hasGenotypes(), "hasGenotypes");
         if ( expected.hasGenotypes() ) {
-            VariantBaseTest.assertEqualsSet(actual.getSampleNames(), expected.getSampleNames(), "sample names set");
-            Assert.assertEquals(actual.getSampleNamesOrderedByName(), expected.getSampleNamesOrderedByName(), "sample names");
-            final Set<String> samples = expected.getSampleNames();
+            VariantBaseTest.assertEqualsSet(scala.collection.JavaConversions.asJavaSet(actual.genotypeContext().getSampleNames()), scala.collection.JavaConversions.asJavaSet(expected.genotypeContext().getSampleNames()), "sample names set");
+            Assert.assertEquals(actual.genotypeContext().getSampleNamesOrderedByName(), expected.genotypeContext().getSampleNamesOrderedByName(), "sample names");
+            final Set<String> samples = scala.collection.JavaConversions.asJavaSet(expected.genotypeContext().getSampleNames());
             for ( final String sample : samples ) {
-                assertEquals(actual.getGenotype(sample), expected.getGenotype(sample));
+                assertEquals(actual.genotypeContext().apply(sample), expected.genotypeContext().apply(sample));
             }
         }
     }
@@ -936,7 +938,7 @@ public class VariantContextTestProvider {
                 final List<List<Allele>> possibleGenotypes = makeAllGenotypes(possibleGenotypeAlleles, highestPloidy);
                 final int nPossibleGenotypes = possibleGenotypes.size();
 
-                VariantContextBuilder vb = new VariantContextBuilder("unittest", "1", 1, 1, siteAlleles);
+                VariantContextBuilder vb = new VariantContextBuilder("unittest", "1", 1, 1, new AlleleContext(siteAlleles.toArray(new Allele[siteAlleles.size()])));
 
                 // first test -- create n copies of each genotype
                 for ( int i = 0; i < nPossibleGenotypes; i++ ) {
@@ -948,7 +950,7 @@ public class VariantContextTestProvider {
 
 
                     samples.add(GenotypeBuilder.apply("sample" + i, aArr));
-                    add(vb.genotypes(samples));
+                    add(vb.genotypes(scala.collection.JavaConversions.asScalaBuffer(samples)));
                 }
 
                 // second test -- create one sample with each genotype
@@ -963,7 +965,7 @@ public class VariantContextTestProvider {
 
                         samples.add(GenotypeBuilder.apply("sample" + i, aArr));
                     }
-                    add(vb.genotypes(samples));
+                    add(vb.genotypes(scala.collection.JavaConversions.asScalaBuffer(samples)));
                 }
 
                 // test mixed ploidy
@@ -978,7 +980,7 @@ public class VariantContextTestProvider {
 
 
                         samples.add(GenotypeBuilder.apply("sample" + i, aArr));
-                        add(vb.genotypes(samples));
+                        add(vb.genotypes(scala.collection.JavaConversions.asScalaBuffer(samples)));
                     }
                 }
             }

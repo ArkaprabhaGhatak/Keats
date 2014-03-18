@@ -84,10 +84,10 @@ public abstract class VCFCompoundHeaderLine extends VCFHeaderLine implements VCF
         switch ( countType ) {
             case INTEGER:       return count;
             case UNBOUNDED:     return -1;
-            case A:             return vc.getNAlleles() - 1;
+            case A:             return vc.alleleContext().getNAlleles() - 1;
             case G:
                 final int ploidy = vc.getMaxPloidy(2);
-                return GenotypeLikelihoods.numLikelihoods(vc.getNAlleles(), ploidy);
+                return GenotypeLikelihoods.numLikelihoods(vc.alleleContext().getNAlleles(), ploidy);
             default:
                 throw new TribbleException("Unknown count type: " + countType);
         }

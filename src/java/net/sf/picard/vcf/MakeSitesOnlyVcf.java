@@ -94,8 +94,8 @@ public class MakeSitesOnlyVcf extends CommandLineProgram {
     /** Makes a new VariantContext with only the desired samples. */
     private static VariantContext subsetToSamplesWithOriginalAnnotations(final VariantContext ctx, final Set<String> samples) {
         final VariantContextBuilder builder = new VariantContextBuilder(ctx);
-        final GenotypesContext newGenotypes = ctx.getGenotypes().subsetToSamples(samples);
-        builder.alleles(ctx.getAlleles());
+        final GenotypesContext newGenotypes = ctx.genotypeContext().subsetToSamples(scala.collection.JavaConversions.asScalaSet(samples));
+        builder.alleles(ctx.alleleContext().getAlleles());
         return builder.genotypes(newGenotypes).make();
     }
 }

@@ -242,7 +242,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
             encoder.encodeRawMissingValue(BCF2Type.FLOAT);
 
         // info fields
-        final int nAlleles = vc.getNAlleles();
+        final int nAlleles = vc.alleleContext().getNAlleles();
         final int nInfo = vc.getAttributes().size();
         final int nGenotypeFormatFields = getNGenotypeFormatFields(vc);
         final int nSamples = header.getNGenotypeSamples();
@@ -280,16 +280,16 @@ class BCF2Writer extends IndexingVariantContextWriter {
     }
 
     private BCF2Codec.LazyData getLazyData(final VariantContext vc) {
-        if ( vc.getGenotypes().isLazyWithData() ) {
-            final LazyGenotypesContext lgc = (LazyGenotypesContext)vc.getGenotypes();
-
-            if ( lgc.getUnparsedGenotypeData() instanceof BCF2Codec.LazyData &&
-                    canSafelyWriteRawGenotypesBytes((BCF2Codec.LazyData) lgc.getUnparsedGenotypeData())) {
-                return (BCF2Codec.LazyData)lgc.getUnparsedGenotypeData();
-            } else {
-                lgc.decode(); // WARNING -- required to avoid keeping around bad lazy data for too long
-            }
-        }
+//        if ( vc.getGenotypes().isLazyWithData() ) {
+//            final LazyGenotypesContext lgc = (LazyGenotypesContext)vc.getGenotypes();
+//
+//            if ( lgc.getUnparsedGenotypeData() instanceof BCF2Codec.LazyData &&
+//                    canSafelyWriteRawGenotypesBytes((BCF2Codec.LazyData) lgc.getUnparsedGenotypeData())) {
+//                return (BCF2Codec.LazyData)lgc.getUnparsedGenotypeData();
+//            } else {
+//                lgc.decode(); // WARNING -- required to avoid keeping around bad lazy data for too long
+//            }
+//        }
 
         return null;
     }
@@ -305,7 +305,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
      */
     private int getNGenotypeFormatFields(final VariantContext vc) {
         final BCF2Codec.LazyData lazyData = getLazyData(vc);
-        return lazyData != null ? lazyData.nGenotypeFields : vc.calcVCFGenotypeKeys(header).size();
+        return lazyData != null ? lazyData.nGenotypeFields : vc.calcVCFGenotypeKeys(header).length;
     }
 
     private void buildID( VariantContext vc ) throws IOException {
@@ -313,7 +313,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
     }
 
     private void buildAlleles( VariantContext vc ) throws IOException {
-        for ( Allele allele : vc.getAlleles() ) {
+        for ( Allele allele : vc.alleleContext().getAlleles() ) {
             final byte[] s = allele.getDisplayBases();
             if ( s == null )
                 throw new IllegalStateException("BUG: BCF2Writer encountered null padded allele" + allele);
@@ -323,7 +323,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
 
     private void buildFilter( VariantContext vc ) throws IOException {
         if ( vc.isFiltered() ) {
-            encodeStringsByRef(vc.getFilters());
+            encodeStringsByRef(scala.collection.JavaConversions.asJavaSet(vc.getFilters()));
         } else if ( vc.filtersWereApplied() ) {
             encodeStringsByRef(Collections.singleton(VCFConstants.PASSES_FILTERS_v4));
         } else {
@@ -332,7 +332,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
     }
 
     private void buildInfo( VariantContext vc ) throws IOException {
-        for ( Map.Entry<String, Object> infoFieldEntry : vc.getAttributes().entrySet() ) {
+        for ( Map.Entry<String, Object> infoFieldEntry : scala.collection.JavaConversions.asJavaMap(vc.getAttributes()).entrySet() ) {
             final String field = infoFieldEntry.getKey();
             final BCF2FieldWriter.SiteWriter writer = fieldManager.getSiteFieldWriter(field);
             if ( writer == null ) errorUnexpectedFieldToWrite(vc, field, "INFO");
@@ -350,7 +350,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
         }
 
         // we have to do work to convert the VC into a BCF2 byte stream
-        final List<String> genotypeFields = vc.calcVCFGenotypeKeys(header);
+        final List<String> genotypeFields = Arrays.asList(vc.calcVCFGenotypeKeys(header));
         for ( final String field : genotypeFields ) {
             final BCF2FieldWriter.GenotypesWriter writer = fieldManager.getGenotypeFieldWriter(field);
             if ( writer == null ) errorUnexpectedFieldToWrite(vc, field, "FORMAT");
@@ -359,7 +359,7 @@ class BCF2Writer extends IndexingVariantContextWriter {
 
             writer.start(encoder, vc);
             for ( final String name : sampleNames ) {
-                Genotype g = vc.getGenotype(name);
+                Genotype g = vc.genotypeContext().apply(name);
                 if ( g == null ) g = GenotypeBuilder.createMissing(name, writer.nValuesPerGenotype);
                 writer.addGenotype(encoder, vc, g);
             }

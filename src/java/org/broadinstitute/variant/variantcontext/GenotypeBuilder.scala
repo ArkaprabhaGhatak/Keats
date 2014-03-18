@@ -416,7 +416,7 @@ object GenotypeBuilder
   //
   // -----------------------------------------------------------------
 
-  def apply( sampleName : String,   alleles : Array[Allele])  : Genotype = {  new GenotypeBuilder(sampleName, alleles).make();  }
+  def apply( sampleName : String,   alleles : Array[Allele])  : Genotype = {  new GenotypeBuilder(sampleName, alleles).make()  }
 
 
 

@@ -137,10 +137,10 @@ public class VCFWriterUnitTest extends VariantBaseTest {
             aArr = aList.toArray(aArr);
 
             final Genotype gt = new GenotypeBuilder(name,aArr).GQ(0).attribute("BB", "1").phased(true).make();
-            genotypes.add(gt);
+            genotypes.$plus$eq(gt);
         }
-        return new VariantContextBuilder("RANDOM", chrom, position, position, alleles)
-                .genotypes(genotypes).attributes(attributes).make();
+        return new VariantContextBuilder("RANDOM", chrom, position, position, new AlleleContext(alleles.toArray(new Allele[alleles.size()])))
+                .genotypes(genotypes).attributesFromJava(scala.collection.JavaConversions.asScalaMap(attributes)).make();
     }
 
 

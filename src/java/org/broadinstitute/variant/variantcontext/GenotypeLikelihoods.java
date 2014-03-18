@@ -194,7 +194,7 @@ public class GenotypeLikelihoods {
     }
 
     public double getLog10GQ(Genotype genotype, VariantContext context) {
-        return getLog10GQ(genotype,context.getAlleles());
+        return getLog10GQ(genotype,Arrays.asList(context.alleleContext().getAlleles()));
     }
 
     public static double getGQLog10FromLikelihoods(int iOfChoosenGenotype, double[] likelihoods){

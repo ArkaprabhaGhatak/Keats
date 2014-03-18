@@ -124,12 +124,62 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
             final SitesInfoForDecoding info = decodeSitesExtendedInfo(builder);
 
             decoder.readNextBlock(genotypeBlockSize, inputStream);
-            createLazyGenotypesDecoder(info, builder);
+
+            //createLazyGenotypesDecoder(info, builder);
+
+            List<Genotype> genotypes = parseGenotypes(decoder.getRecordBytes(), info);
+            builder.genotypes(scala.collection.JavaConversions.asScalaBuffer(genotypes));
+
+
             return builder.fullyDecoded(true).make();
         } catch ( IOException e ) {
             throw new TribbleException("Failed to read BCF file", e);
         }
     }
+
+
+    public List<Genotype> parseGenotypes(final byte[] bytes, SitesInfoForDecoding info ) {
+        try {
+
+            int nSamples = header.getNGenotypeSamples();
+            int nFields = info.nFormatFields;
+            List<Allele> siteAlleles = info.alleles;
+
+            // load our byte[] data into the decoder
+            final BCF2Decoder decoder = new BCF2Decoder(bytes);
+
+            for ( int i = 0; i < nSamples; i++ )
+                builders[i].reset(true);
+
+            for ( int i = 0; i < nFields; i++ ) {
+                // get the field name
+                final int offset = (Integer) decoder.decodeTypedValue();
+                final String field = getDictionaryString(offset);
+
+                // the type of each element
+                final byte typeDescriptor = decoder.readTypeDescriptor();
+                final int numElements = decoder.decodeNumberOfElements(typeDescriptor);
+                final BCF2GenotypeFieldDecoders.Decoder fieldDecoder = getGenotypeFieldDecoder(field);
+                try {
+                    fieldDecoder.decode(siteAlleles, field, decoder, typeDescriptor, numElements, builders);
+                } catch ( ClassCastException e ) {
+                    throw new TribbleException("BUG: expected encoding of field " + field
+                            + " inconsistent with the value observed in the decoded value");
+                }
+            }
+
+            final ArrayList<Genotype> genotypes = new ArrayList<Genotype>(nSamples);
+            for ( final GenotypeBuilder gb : builders )
+                genotypes.add(gb.make());
+
+            return genotypes;
+        } catch ( IOException e ) {
+            throw new TribbleException("Unexpected IOException parsing already read genotypes data block", e);
+        }
+    }
+
+
+
 
     @Override
     public Class<VariantContext> getFeatureType() {
@@ -348,7 +398,7 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
         }
         assert ref != null;
 
-        builder.alleles(alleles);
+        builder.alleles(alleles.toArray(new Allele[alleles.size()]));
 
         assert ref.length() > 0;
 
@@ -400,7 +450,7 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
             infoFieldEntries.put(key, value);
         }
 
-        builder.attributes(infoFieldEntries);
+        builder.attributesFromJava(scala.collection.JavaConversions.asScalaMap(infoFieldEntries));
     }
 
     // --------------------------------------------------------------------------------
@@ -409,29 +459,29 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
     //
     // --------------------------------------------------------------------------------
 
-    /**
-     * Create the lazy loader for the genotypes data, and store it in the builder
-     * so that the VC will be able to decode on demand the genotypes data
-     *
-     * @param siteInfo
-     * @param builder
-     */
-    private void createLazyGenotypesDecoder( final SitesInfoForDecoding siteInfo,
-                                             final VariantContextBuilder builder ) {
-        if (siteInfo.nSamples > 0) {
-            final LazyGenotypesContext.LazyParser lazyParser =
-                    new BCF2LazyGenotypesDecoder(this, siteInfo.alleles, siteInfo.nSamples, siteInfo.nFormatFields, builders);
-
-            final LazyData lazyData = new LazyData(header, siteInfo.nFormatFields, decoder.getRecordBytes());
-            final LazyGenotypesContext lazy = new LazyGenotypesContext(lazyParser, lazyData, header.getNGenotypeSamples());
-
-            // did we resort the sample names?  If so, we need to load the genotype data
-            if ( !header.samplesWereAlreadySorted() )
-                lazy.decode();
-
-            builder.genotypesNoValidation(lazy);
-        }
-    }
+//    /**
+//     * Create the lazy loader for the genotypes data, and store it in the builder
+//     * so that the VC will be able to decode on demand the genotypes data
+//     *
+//     * @param siteInfo
+//     * @param builder
+//     */
+//    private void createLazyGenotypesDecoder( final SitesInfoForDecoding siteInfo,
+//                                             final VariantContextBuilder builder ) {
+//        if (siteInfo.nSamples > 0) {
+//            final LazyGenotypesContext.LazyParser lazyParser =
+//                    new BCF2LazyGenotypesDecoder(this, siteInfo.alleles, siteInfo.nSamples, siteInfo.nFormatFields, builders);
+//
+//            final LazyData lazyData = new LazyData(header, siteInfo.nFormatFields, decoder.getRecordBytes());
+//            final LazyGenotypesContext lazy = new LazyGenotypesContext(lazyParser, lazyData, header.getNGenotypeSamples());
+//
+//            // did we resort the sample names?  If so, we need to load the genotype data
+//            if ( !header.samplesWereAlreadySorted() )
+//                lazy.decode();
+//
+//            builder.genotypesNoValidation(lazy);
+//        }
+//    }
 
     public static class LazyData {
         final public VCFHeader header;
