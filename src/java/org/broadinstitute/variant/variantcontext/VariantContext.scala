@@ -822,7 +822,8 @@ class VariantContext(
 
         if ( decoded != null && !lenientDecoding && format.getCountType() != VCFHeaderLineCount.UNBOUNDED  && format.getType() != VCFHeaderLineType.Flag )
         { // we expect exactly the right number of elements
-        val obsSize = if(decoded.isInstanceOf[Array[Any]]){ decoded.asInstanceOf[Array[Any]].size} else{ 1 }
+        val obsSize = if(decoded.isInstanceOf[Array[Any]]){ decoded.asInstanceOf[Array[Any]].size}
+                      else{ 1 }
           val expSize = format.getCount(this);
           if ( obsSize != expSize ) {
             throw new TribbleException.InvalidHeader("Discordant field size detected for field " +

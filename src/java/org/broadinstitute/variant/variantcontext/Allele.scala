@@ -118,7 +118,7 @@ class Allele(private val _bases : Array[Byte],  val isReference : Boolean) exten
 
   // null alleles are no longer allowed
   if ( Allele.wouldBeNullAllele(_bases) )      { throw new IllegalArgumentException("Null alleles are not supported")                                }
-  if (! Allele.acceptableAlleleBases(_bases) ) { throw new IllegalArgumentException("Unexpected base in allele bases \'" + new String(bases)+"\'");  }
+  if (! Allele.acceptableAlleleBases(_bases) ) { throw new IllegalArgumentException("Unexpected base in allele bases \'" + new String(_bases)+"\'");  }
 
   // ---------------------------------------------------------------------------------------------------------
   //
