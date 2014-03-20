@@ -2,7 +2,7 @@ Keats
 =====
 
 Keats is a Scala port of the Picard library of the Broad Institute of Harvard and MIT. 
-It is one of the most advanced and widely used libraries for representation and processing of Genomic data from BAM, VCF and BCF files. 
+Picard is one of the most advanced and widely used libraries for representation and processing of Genomic data from BAM, VCF and BCF files. 
 http://picard.sourceforge.net/
 
 The goal of the port is to use the advanced language features of Scala to make the library easier to understand / use and more scalabe for use in Genomics research. A personal side goal is to increase my knowledge of Scala and advanced data structure representation of Genomic variation.
