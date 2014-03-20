@@ -3,7 +3,7 @@ Keats
 
 Keats is a Scala port of the Picard library of the Broad Institute of Harvard and MIT. http://picard.sourceforge.net/
 
-The goal is to use the advanced language features of Scala to make the library easier to understand / use and more scalabe for use in Genomics research.
+The goal is to use the advanced language features of Scala to make the library easier to understand / use and more scalabe for use in Genomics research. A side goal is to increase my knowledge of Scala and advanced representation of Genomic variation in data structures. 
 
 See Coursera Functional Programming Principles in Scala for the advanced Scala features. 
 https://www.coursera.org/course/progfun
