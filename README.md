@@ -16,5 +16,5 @@ I already ported the core genomic data representation classes : VariantContext, 
 Porting can be done class by class and existing unit tests are reused. This is possible because Java and Scala are compatible.
 I am now working on making the vcf/bcf codec, reader and writer threadsafe.
 
-Keats is a work in progress and not yet ready for use. The code is MIT license. 
+Keats is not yet end user ready software, but aimed at developers interested in Scala and the functionality of Picard.  The code is MIT license. 
 Feel free to fork (parts of) the project or help with porting the code to Scala.
