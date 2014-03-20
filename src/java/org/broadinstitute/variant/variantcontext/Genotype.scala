@@ -487,7 +487,7 @@ abstract class Genotype(private val sampleName: String, private val filters: Str
   @Requires(Array[String]("key != null","! isForbiddenKey(key)" ))
   @Ensures(Array[String]("hasExtendedAttribute(key) || result == defaultValue"))
   def getExtendedAttribute( key : String,  defaultValue: Any) : Any = {
-    if(hasExtendedAttribute(key)) { getExtendedAttributes().get(key)} else{ defaultValue;}
+    if(hasExtendedAttribute(key)) { getExtendedAttributes()(key) } else{ defaultValue;}
   }
 
   /**

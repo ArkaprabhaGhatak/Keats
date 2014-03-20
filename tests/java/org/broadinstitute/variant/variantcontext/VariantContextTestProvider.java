@@ -610,6 +610,8 @@ public class VariantContextTestProvider {
             return GenotypeBuilder.apply(name, new Allele[]{ref, ref});
         else {
             final Object toAdd = value.length == 1 ? value[0] : Arrays.asList(value);
+
+
             return new GenotypeBuilder(name, new Allele[]{ref, ref}).attribute(key, toAdd).make();
         }
     }

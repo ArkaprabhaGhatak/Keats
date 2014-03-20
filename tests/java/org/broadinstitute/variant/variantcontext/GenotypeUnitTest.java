@@ -68,6 +68,10 @@ public class GenotypeUnitTest extends VariantBaseTest {
         Assert.assertEquals(makeGB().filter("x;y;z").make().getFilters(), "x;y;z", "Multiple filter field values should be joined with ;");
     }
 
+
+
+
+
 //    public Genotype(String sampleName, List<Allele> alleles, double negLog10PError, Set<String> filters, Map<String, ?> attributes, boolean isPhased) {
 //    public Genotype(String sampleName, List<Allele> alleles, double negLog10PError, Set<String> filters, Map<String, ?> attributes, boolean isPhased, double[] log10Likelihoods) {
 //    public Genotype(String sampleName, List<Allele> alleles, double negLog10PError, double[] log10Likelihoods)

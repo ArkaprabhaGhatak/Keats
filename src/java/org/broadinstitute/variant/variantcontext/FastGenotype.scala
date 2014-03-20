@@ -131,6 +131,8 @@ class FastGenotype( private val sampleName : String,
 
   override  def getPL() : Array[Int] = { PL }
 
+
+
   // ---------------------------------------------------------------------------------------------------------
   //
   // get routines for extended attributes

@@ -69,7 +69,7 @@ class GenotypeBuilder {
   private var DP = -1;
   private var AD  : Array[Int]= null;
   private var PL : Array[Int] = null;
-  private var extendedAttributes :  immutable.Map[String, Any] = null;
+  private var extendedAttributes : immutable.HashMap[String, Any] = GenotypeBuilder.NO_ATTRIBUTES;
   private var filters : String = null;
   private var initialAttributeMapSize = 5;
 
@@ -327,9 +327,21 @@ class GenotypeBuilder {
   @Requires(Array[String]({"key != null"}))
   @Ensures(Array[String]("extendedAttributes != null", "extendedAttributes.containsKey(key)"))
   def attribute(  key : String,   value : Any) : GenotypeBuilder=  {
-    if ( extendedAttributes == null )
-      extendedAttributes = immutable.HashMap[String, Any]()
-    extendedAttributes += (key -> value)
+
+    if(key == "GV")
+    {
+      val blaat = "blaat"
+    }
+
+    if(value.isInstanceOf[String] && value.asInstanceOf[String] == "Some(S1)")
+    {
+      val blaat = "blaat";
+    }
+
+
+    if ( extendedAttributes == null ){
+      extendedAttributes = immutable.HashMap[String, Any]()}
+    extendedAttributes = extendedAttributes + (key -> value)
     this;
   }
 

@@ -695,6 +695,11 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                         } else if (gtKey.equals(VCFConstants.DEPTH_KEY)) {
                             gb.DP(Integer.valueOf(GTValueArray[i]));
                         } else {
+                            if(gtKey.equals("GV"))
+                            {
+                                String blaat = "blaat";
+                            }
+
                             gb.attribute(gtKey, GTValueArray[i]);
                         }
                     }

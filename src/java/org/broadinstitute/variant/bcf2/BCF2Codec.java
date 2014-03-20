@@ -145,6 +145,17 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
             int nFields = info.nFormatFields;
             List<Allele> siteAlleles = info.alleles;
 
+            if(bytes.length ==3 && bytes[0] == 17 && bytes[1] == 10 && bytes[2] == -15)
+            {
+                String blaat = "b;laat";
+            }
+
+
+            if(nSamples > 0)
+            {
+                String blaat = "blaat";
+            }
+
             // load our byte[] data into the decoder
             final BCF2Decoder decoder = new BCF2Decoder(bytes);
 
@@ -158,7 +169,15 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
 
                 // the type of each element
                 final byte typeDescriptor = decoder.readTypeDescriptor();
-                final int numElements = decoder.decodeNumberOfElements(typeDescriptor);
+                //final int numElements = decoder.decodeNumberOfElements(typeDescriptor);
+                Integer numElements = null;
+
+                try{
+                    numElements = decoder.decodeNumberOfElements(typeDescriptor);
+                }
+                catch ( ArrayIndexOutOfBoundsException e ) {
+                    throw new TribbleException("ArrayIndexOutOfBoundsException", e);
+                }
                 final BCF2GenotypeFieldDecoders.Decoder fieldDecoder = getGenotypeFieldDecoder(field);
                 try {
                     fieldDecoder.decode(siteAlleles, field, decoder, typeDescriptor, numElements, builders);
@@ -176,6 +195,7 @@ public final class BCF2Codec extends BinaryFeatureCodec<VariantContext> {
         } catch ( IOException e ) {
             throw new TribbleException("Unexpected IOException parsing already read genotypes data block", e);
         }
+
     }
 
 

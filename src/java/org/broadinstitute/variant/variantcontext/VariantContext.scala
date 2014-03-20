@@ -203,6 +203,7 @@ import scala.collection._
 import scala.collection.JavaConversions._
 import org.broadinstitute.variant.vcf._
 import org.broad.tribble.{TribbleException, Feature}
+import java.util
 
 
 // ---------------------------------------------------------------------------------------------------------
@@ -805,24 +806,17 @@ class VariantContext(
   {
     var newAttributes = immutable.HashMap[String, Any]()
 
-    val attributesEntrySetIter =   attributes.entrySet().iterator()
-    var counter = 0
-    val limit = attributes.size
-
-    while(counter < limit)
+    for((field, value) <- attributes)
     {
-      val attr = attributesEntrySetIter.next()
-      val field = attr.getKey();
-
       if ( field.equals(VCFConstants.GENOTYPE_FILTER_KEY) ){} // gross, FT is part of the extended attributes
       else
       {
         val format = VariantContextUtils.getMetaDataForField(header, field);
-        val decoded = decodeValue(field, attr.getValue(), format);
+        val decodedValue = decodeValue(field, value, format);
 
-        if ( decoded != null && !lenientDecoding && format.getCountType() != VCFHeaderLineCount.UNBOUNDED  && format.getType() != VCFHeaderLineType.Flag )
+        if ( decodedValue != null && !lenientDecoding && format.getCountType() != VCFHeaderLineCount.UNBOUNDED  && format.getType() != VCFHeaderLineType.Flag )
         { // we expect exactly the right number of elements
-        val obsSize = if(decoded.isInstanceOf[Array[Any]]){ decoded.asInstanceOf[Array[Any]].size}
+        val obsSize = if(decodedValue.isInstanceOf[java.util.ArrayList[Any]]){ decodedValue.asInstanceOf[java.util.ArrayList[Any]].size}
                       else{ 1 }
           val expSize = format.getCount(this);
           if ( obsSize != expSize ) {
@@ -832,37 +826,68 @@ class VariantContext(
               format);
           }
         }
-        newAttributes += (field -> decoded)
+        newAttributes += (field -> decodedValue)
       }
-      counter +=1
     }
     newAttributes;
   }
 
   private def decodeValue( field : String,  value : Any,  format : VCFCompoundHeaderLine) : Any = {
+
+    if(value.isInstanceOf[Some[Integer]])
+    {
+      val blaat = "blaat";
+    }
+
+    if(field == "GV")
+    {
+      val blaat = "blaat"
+    }
+
+
     if ( value.isInstanceOf[String] )
     {
       if ( field.equals(VCFConstants.GENOTYPE_PL_KEY) ){ GenotypeLikelihoods.fromPLField(value.asInstanceOf[String]);}
       else
       {
         val string = value.asInstanceOf[String];
+
+
         if ( string.indexOf(",") != -1 ) {
-          string.split(",").map(splitString => decodeOne(field, splitString, format));
+
+
+          val array = string.split(",").map(splitString => decodeOne(field, splitString, format));
+          scala.collection.JavaConversions.asJavaList(array.toBuffer)
+
         }
         else { decodeOne(field, string, format);  }
       }
     }
     else if ( value.isInstanceOf[Array[Any]] && (( value.asInstanceOf[Array[Any]](0)).isInstanceOf[String] ) )
     {
-      val asList = value.asInstanceOf[Array[String]];
-      asList.map(item => decodeOne(field, item, format))
+      val array = value.asInstanceOf[Array[String]];
+      val array2 = array.map(item => decodeOne(field, item, format))
+
+      val arrayList : java.util.List[Object] = new java.util.ArrayList[Object]
+      array2.foreach(arrayList.add(_))
+      arrayList
+
+
+    }
+    else if ( value.isInstanceOf[java.util.ArrayList[Any]] && (( value.asInstanceOf[java.util.ArrayList[Any]](0)).isInstanceOf[String] ) )
+    {
+      val array = scala.collection.JavaConversions.asScalaBuffer(value.asInstanceOf[java.util.ArrayList[String]]).toArray;
+      val array2 = array.map(item => decodeOne(field, item, format))
+      val arrayList : java.util.List[Object] = new java.util.ArrayList[Object]
+      array2.foreach(arrayList.add(_))
+      arrayList
     }
     else { value; }
 
     // allowMissingValuesComparedToHeader
   }
 
-  private def decodeOne( field : String, string : String,  format : VCFCompoundHeaderLine) : Any = {
+  private def decodeOne( field : String, string : String,  format : VCFCompoundHeaderLine) : Object = {
     try {
       if ( string.equals(VCFConstants.MISSING_VALUE_v4) ){ null }
       else
@@ -874,10 +899,10 @@ class VariantContext(
             if ( b == false ){
               throw new TribbleException("VariantContext FLAG fields " + field + " cannot contain false values"
                 + " as seen at " + getChr() + ":" + getStart());}
-            b;
+            b : java.lang.Boolean;
           case VCFHeaderLineType.String   => string;
-          case VCFHeaderLineType.Integer  => string.toInt
-          case VCFHeaderLineType.Float    => string.toDouble;
+          case VCFHeaderLineType.Integer  => string.toInt : java.lang.Integer
+          case VCFHeaderLineType.Float    => string.toDouble :java.lang.Double;
           case _        => throw new TribbleException("Unexpected type for field" + field);
         }
       }
@@ -888,6 +913,11 @@ class VariantContext(
 
   private def fullyDecodeGenotypes(  builder : VariantContextBuilder,  header : VCFHeader)   {
     val gc =  GenotypesContext.create();
+
+    if(genotypeContext.getGenotypes.size > 0 && genotypeContext(0).getExtendedAttributes().size > 0 && genotypeContext(0).getExtendedAttributes().contains("GV"))
+    {
+      val blaat = "blaat"
+    }
 
     genotypeContext.getGenotypes.foreach(g => gc += (fullyDecodeGenotypes(g, header)))
     builder.genotypesNoValidation(gc);

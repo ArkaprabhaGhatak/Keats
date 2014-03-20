@@ -351,6 +351,12 @@ class BCF2Writer extends IndexingVariantContextWriter {
 
         // we have to do work to convert the VC into a BCF2 byte stream
         final List<String> genotypeFields = Arrays.asList(vc.calcVCFGenotypeKeys(header));
+
+        if(genotypeFields.size() > 0)
+        {
+            String blaat = "blaat";
+        }
+
         for ( final String field : genotypeFields ) {
             final BCF2FieldWriter.GenotypesWriter writer = fieldManager.getGenotypeFieldWriter(field);
             if ( writer == null ) errorUnexpectedFieldToWrite(vc, field, "FORMAT");
