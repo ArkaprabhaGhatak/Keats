@@ -11,7 +11,7 @@ https://www.coursera.org/course/progfun
 And of course Akka http://akka.io/
 
 I already ported the core genomic data representation classes : VariantContext, Allele(Context) and Genotype(Context).
-Porting can be done class by class and existing unit tests arereused. This is possible because Java and Scala are compatible.
+Porting can be done class by class and existing unit tests are reused. This is possible because Java and Scala are compatible.
 I am now working on making the vcf/bcf codec, reader and writer threadsafe.
 
 Keats is a work in progress and not ready for use. The code is MIT license. 
